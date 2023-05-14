@@ -301,8 +301,12 @@ WITH demographic AS (
     , ROW_NUMBER() OVER
         (
             PARTITION BY stay_id
-            ORDER BY CASE WHEN MAX(ventilation_status) = 'None' THEN 2
-                          ELSE 1 END
+            ORDER BY CASE WHEN MAX(ventilation_status) = 'Tracheostomy' THEN 1
+                          WHEN MAX(ventilation_status) = 'InvasiveVent' THEN 2
+                          WHEN MAX(ventilation_status) = 'NonInvasiveVent' THEN 3
+                          WHEN MAX(ventilation_status) = 'HFNC' THEN 4
+                          WHEN MAX(ventilation_status) = 'SupplementalOxygen' THEN 5
+                          ELSE 6 END
         ) AS ventilation_seq
     FROM vd2
     GROUP BY stay_id, vent_seq
