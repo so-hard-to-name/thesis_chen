@@ -298,6 +298,12 @@ WITH demographic AS (
     -- for efficiency, we use an aggregate here,
     -- but we could equally well group by this column
     , MAX(ventilation_status) AS ventilation_status
+    , ROW_NUMBER() OVER
+        (
+            PARTITION BY stay_id
+            ORDER BY CASE WHEN MAX(ventilation_status) = 'None' THEN 2
+                          ELSE 1 END
+        ) AS ventilation_seq
     FROM vd2
     GROUP BY stay_id, vent_seq
     HAVING MIN(charttime) != MAX(charttime)
@@ -537,14 +543,15 @@ SELECT
     , hematologic
     , hepatic
     FROM demographic
-    LEFT JOIN vitalsign 
+    JOIN vitalsign 
         ON demographic.stay_id = vitalsign.stay_id
-    LEFT JOIN gcs
+    JOIN gcs
         ON demographic.stay_id = gcs.stay_id
             AND gcs.gcs_seq = 1
-    LEFT JOIN vs_final
+    JOIN vs_final
         ON demographic.stay_id = vs_final.stay_id
             AND vs_final.starttime >= DATETIME_SUB(demographic.intime, INTERVAL '6' HOUR)
             AND vs_final.starttime <= DATETIME_ADD(demographic.intime, INTERVAL '1' DAY)
+            AND vs_final.ventilation_seq = 1
     LEFT JOIN scorecomp s
           ON demographic.stay_id = s.stay_id
