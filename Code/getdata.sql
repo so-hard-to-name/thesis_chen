@@ -15,6 +15,7 @@ WITH demographic AS (
     LEFT JOIN `physionet-data.mimiciv_hosp.patients` pa
         ON ie.subject_id = pa.subject_id
     WHERE pa.anchor_age + DATETIME_DIFF(ie.intime, DATETIME(pa.anchor_year, 1, 1, 0, 0, 0), YEAR) > 18
+        AND ie.outtime > DATETIME_ADD(ie.intime, INTERVAL '1' DAY)
 )
 
 , vitalsign AS (
@@ -51,6 +52,14 @@ WITH demographic AS (
             AND ce.charttime >= DATETIME_SUB(ie.intime, INTERVAL '6' HOUR)
             AND ce.charttime <= DATETIME_ADD(ie.intime, INTERVAL '1' DAY)
     GROUP BY ie.subject_id, ie.stay_id
+    HAVING COUNT(heart_rate) > 3
+        AND COUNT(sbp) > 3
+        AND COUNT(dbp) > 3
+        AND COUNT(mbp) > 3
+        AND COUNT(resp_rate) > 3
+        AND COUNT(temperature) > 3
+        AND COUNT(spo2) > 3
+        AND COUNT(glucose) > 3
     )
   , gcs AS (
     SELECT
@@ -73,6 +82,22 @@ WITH demographic AS (
         ON ie.stay_id = g.stay_id
             AND g.charttime >= DATETIME_SUB(ie.intime, INTERVAL '6' HOUR)
             AND g.charttime <= DATETIME_ADD(ie.intime, INTERVAL '1' DAY)
+)
+
+, urinefinal AS (
+    SELECT
+        -- patient identifiers
+        ie.subject_id
+        , ie.stay_id
+        , SUM(urineoutput) AS urineoutput
+    FROM `physionet-data.mimiciv_icu.icustays` ie
+    -- Join to the outputevents table to get urine output
+    LEFT JOIN `physionet-data.mimiciv_derived.urine_output` uo
+        ON ie.stay_id = uo.stay_id
+            -- ensure the data occurs during the first day
+            AND uo.charttime >= ie.intime
+            AND uo.charttime <= DATETIME_ADD(ie.intime, INTERVAL '1' DAY)
+    GROUP BY ie.subject_id, ie.stay_id
 )
 
 , tm AS (
@@ -527,6 +552,7 @@ SELECT
     , vitalsign.glucose_min
     , vitalsign.glucose_max
     , vitalsign.glucose_mean
+    , urinefinal.urineoutput
     , gcs.gcs_value
     , gcs.gcs_motor
     , gcs.gcs_verbal
@@ -549,6 +575,8 @@ SELECT
     FROM demographic
     JOIN vitalsign 
         ON demographic.stay_id = vitalsign.stay_id
+    JOIN urinefinal
+        ON demographic.stay_id = urinefinal.stay_id
     JOIN gcs
         ON demographic.stay_id = gcs.stay_id
             AND gcs.gcs_seq = 1
@@ -559,3 +587,14 @@ SELECT
             AND vs_final.ventilation_seq = 1
     LEFT JOIN scorecomp s
           ON demographic.stay_id = s.stay_id
+    WHERE vitalsign.heart_rate_min IS NOT NULL
+      AND vitalsign.sbp_min IS NOT NULL
+      AND vitalsign.dbp_min IS NOT NULL
+      AND vitalsign.mbp_min IS NOT NULL
+      AND vitalsign.resp_rate_min IS NOT NULL
+      AND vitalsign.temperature_min IS NOT NULL
+      AND vitalsign.spo2_min IS NOT NULL
+      AND urinefinal.urineoutput IS NOT NULL
+      AND gcs.gcs_value IS NOT NULL
+      AND gcs.gcs_motor IS NOT NULL
+      AND gcs.gcs_eyes IS NOT NULL
