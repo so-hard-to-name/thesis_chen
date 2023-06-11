@@ -1,1 +1,3 @@
-featuretools
+pandas
+scikit-learn
+xgboost

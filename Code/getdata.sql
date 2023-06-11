@@ -18,6 +18,7 @@ WITH demographic AS (
         AND ie.outtime > DATETIME_ADD(ie.intime, INTERVAL '1' DAY)
 )
 
+-- Vitalsign
 , vitalsign AS (
     SELECT
     ie.subject_id
@@ -61,7 +62,9 @@ WITH demographic AS (
         AND COUNT(spo2) > 3
         AND COUNT(glucose) > 3
     )
-  , gcs AS (
+
+-- GCS
+, gcs AS (
     SELECT
         ie.subject_id, ie.stay_id
         , g.gcs AS gcs_value
@@ -84,6 +87,7 @@ WITH demographic AS (
             AND g.charttime <= DATETIME_ADD(ie.intime, INTERVAL '1' DAY)
 )
 
+-- Urine Output
 , urinefinal AS (
     SELECT
         -- patient identifiers
@@ -100,6 +104,8 @@ WITH demographic AS (
     GROUP BY ie.subject_id, ie.stay_id
 )
 
+
+-- Ventilation
 , tm AS (
     SELECT stay_id, charttime
     FROM `physionet-data.mimiciv_derived.ventilator_setting`
@@ -323,6 +329,13 @@ WITH demographic AS (
     -- for efficiency, we use an aggregate here,
     -- but we could equally well group by this column
     , MAX(ventilation_status) AS ventilation_status
+    , CASE WHEN MAX(ventilation_status) = 'Tracheostomy' THEN 1
+            WHEN MAX(ventilation_status) = 'InvasiveVent' THEN 2
+            WHEN MAX(ventilation_status) = 'NonInvasiveVent' THEN 3
+            WHEN MAX(ventilation_status) = 'HFNC' THEN 4
+            WHEN MAX(ventilation_status) = 'SupplementalOxygen' THEN 5
+            ELSE 6 END
+        AS ventilation_code
     , ROW_NUMBER() OVER
         (
             PARTITION BY stay_id
@@ -338,6 +351,8 @@ WITH demographic AS (
     HAVING MIN(charttime) != MAX(charttime)
 )
 
+
+-- LODS
 , cpap AS (
     SELECT ie.stay_id
         , MIN(DATETIME_SUB(charttime, INTERVAL '1' HOUR)) AS starttime
@@ -559,6 +574,7 @@ SELECT
     , gcs.gcs_eyes
     , gcs.gcs_unable
     , vs_final.ventilation_status
+    , vs_final.ventilation_code
     , COALESCE(neurologic, 0)
     + COALESCE(cardiovascular, 0)
     + COALESCE(renal, 0)
@@ -585,7 +601,7 @@ SELECT
             AND vs_final.starttime >= DATETIME_SUB(demographic.intime, INTERVAL '6' HOUR)
             AND vs_final.starttime <= DATETIME_ADD(demographic.intime, INTERVAL '1' DAY)
             AND vs_final.ventilation_seq = 1
-    LEFT JOIN scorecomp s
+    JOIN scorecomp s
           ON demographic.stay_id = s.stay_id
     WHERE vitalsign.heart_rate_min IS NOT NULL
       AND vitalsign.sbp_min IS NOT NULL
@@ -598,3 +614,9 @@ SELECT
       AND gcs.gcs_value IS NOT NULL
       AND gcs.gcs_motor IS NOT NULL
       AND gcs.gcs_eyes IS NOT NULL
+      AND neurologic IS NOT NULL
+      AND cardiovascular IS NOT NULL
+      AND renal IS NOT NULL
+      AND pulmonary IS NOT NULL
+      AND hematologic IS NOT NULL
+      AND hepatic IS NOT NULL
