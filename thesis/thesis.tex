@@ -148,7 +148,8 @@ April 2019
 % ---------------------------------------
 
 \noindent Logistic Organ Dysfunction Scale (LODS), with weighted variables with the worst values in first 24h, is an organ dysfunction score system which reflects severity level within an organ system and among organ systems. It is considered as an outcome risk prediction scoring system as well, since an eauation is included that converts LODS into probability of mortaility. In some research, it is confirmed to be usable for the first 7 days in ICU, and is widely used in other departments as well. LODS calculation needs some labrotary results, such as bilirubin, which cost time and money.
-This thesis is to propose a machine learning model to estimate LODS with data that can be accquired from bedside in ICU, to save time.
+
+\noindent This thesis is to propose a machine learning model to predict LODS with data that can be accquired from bedside in first 12 hours of ICU stay, to save time and assist doctor in treatment.
 
 
 
@@ -200,8 +201,18 @@ This thesis is to propose a machine learning model to estimate LODS with data th
 % \include{intro} % no postfix .tex to the command
 % \include{related_works} % and so on...
 
+The intensive care unit (ICU) treats acutely ill patients with life-threatening conditions. Outcomes could be improved with a specialized unit which has close monitoring is considered as the notion in ICU evolution. \parencite{Vincent13} Patients, families and care providers concern recovery likelihood, however, prognostication can be difficult in ICU. Scoring systems are used to objectively quantify condition severity and risk stratify patients for prognostication in clinical. They are also used as standard tools in critical care research to demonstrate equivalence of patients group. \parencite{Tiffany21}
 
-Critically ill patients meet concerns 
+Logistic Organ Dysfunction \parencite{legall96}, as somewhere between mortality prediction score and organ dysfunction score, is developed to assess and characterize current degree of organ dysfunction. \parencite{Tiffany21, Vincent2010} It selects 12 variables to represent the function of six organ systems, which include laboratory results and non-invasive parameters. 
+
+icu situation and score for icu stays, what is it, why use it, 
+organ dysfunction type
+
+what is machine learning and what is it used for
+
+complex system
+
+chapter information
 
 This document is structured as follows. Chapter~\ref{ch:style}
 discusses briefly the basics of writing and presentation style
@@ -210,6 +221,45 @@ notations. Chapters~\ref{sec:ref_styles} and \ref{ch:concl} summarize
 the referencing basics and the whole document. There are two example
 appendices as well (Appendix A and B).
 % ~\ref{app:A} and \ref{app:B}). Labels do not with \chapter*
+
+\chapter{Background}
+\label{ch:background}
+
+chapter target
+
+\section{Logistic Organ Dysfunction Score}
+organ dysfunction, lods
+\section{Machine Learning}
+machine learning situation,
+electric devices with much data produced in icu stays.
+
+\section{complex system}
+
+
+\chapter{Prior Work}
+\label{ch:priorwork}
+
+Tunc,
+OASIS
+AALTO thesis
+chinese with non-invasive parameters
+
+\chapter{Methods}
+\label{ch:methods}
+
+\section{Dataset}
+\section{Models}
+\subsection{XGBoost}
+\subsection{Random Forest}
+\section{Correlation}
+
+\chapter{Experiments}
+\label{ch:experiment}
+
+\chapter{Results}
+\chapter{Conclusion}
+\chapter{Discussion}
+
 
 
 \chapter{Writing style}
