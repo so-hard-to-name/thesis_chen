@@ -43,6 +43,8 @@ citestyle=authoryear,
 autocite=inline
 ]{biblatex}
 \usepackage{csquotes}
+\usepackage{lscape} 
+\usepackage{threeparttable}
 
 \addbibresource{thesis_refs.bib} %Imports bibliography file
 
@@ -70,7 +72,7 @@ autocite=inline
 % You can also add your own commands
 \newcommand\todo[1]{{\color{red}!!!TODO: #1}} % Remark text in braces appears in red
 \newcommand{\angs}{\textsl{\AA}}              % , e.g. slanted symbol for Ångstöm
-
+\renewcommand{\thetable}{\arabic{table}}
 % Preparatory content ends here
 
 
@@ -203,14 +205,16 @@ April 2019
 
 The intensive care unit (ICU) treats acutely ill patients with life-threatening conditions. Outcomes could be improved with a specialized unit which has close monitoring is considered as the notion in ICU evolution. \parencite{Vincent13} Patients, families and care providers concern recovery likelihood, however, prognostication can be difficult in ICU. Scoring systems are used to objectively quantify condition severity and risk stratify patients for prognostication in clinical. They are also used as standard tools in critical care research to demonstrate equivalence of patients group. \parencite{Tiffany21}
 
-Logistic Organ Dysfunction \parencite{legall96}, as somewhere between mortality prediction score and organ dysfunction score, is developed to assess and characterize current degree of organ dysfunction. \parencite{Tiffany21, Vincent2010} It selects 12 variables to represent the function of six organ systems, which include laboratory results and non-invasive parameters. 
+Logistic Organ Dysfunction Score \parencite{legall96}, as somewhere between mortality prediction score and organ dysfunction score, is developed to assess and characterize current degree of organ dysfunction. \parencite{Tiffany21, Vincent2010} It selects 12 variables to represent the function of six organ systems, which include laboratory results and non-invasive parameters. It ranges from 0 to 22 where 0 is no dysfunction and 22 is maximum dysfunction. It also included a logistic regression equation that can convert the score into a probability of mortality. Although it was not initially validated for repeated use in ICU, \textcite{Timsit2002} validated that LODS characterized the progression of organ dysfunction accurately in the first 7 days of ICU stay.
 
-icu situation and score for icu stays, what is it, why use it, 
-organ dysfunction type
+Machine learning is a branch of artificial intelligence, broadly defined as the capability of a machine to imitate the way that human learns. It is the foundation behind predictive text, language translation apps, and the way social media feeds are presented. \parencite{sara2021} Quoted to \textcite{samuel1959}, machine learning is that computers can be given the ability to learn without being explicitly programmed. What this means is that a computer program learns with observed data and a learning algorithm to perform a task, such as predicting result.
 
-what is machine learning and what is it used for
+Medical score system needs accuracy to reflect patients’ condition, and ease of use to reduce clinician time in using and learning. Only if a score system is substantially better than another one, proved by a large number of research, it will be used in practice. So improving an existed score system is more feasible than replacing, and change should be small but useful.
 
-complex system
+LODS esitmates with the worst value of the first 24 hours of ICU stay, both bedside and laboratory measurements, which cost money and time. This research would use only bedside data because they are easy to access, without long-time waiting or money cost. And for some dangerous patients, 24 hours is a long time to collect data. If 24h severity can be predicted early, doctors will be able to change the treatment. LODS is a hybrid scoring system which makes it a good tool in this prediction. 
+
+As human physiology comprises a complex system, using mathematical models to analyse organ dysfunction may describe systemic host response to infection or injury. \parencite{seely2011} So in this research, machine learning is brought to bedside to predict patients' severity by predicting LODS.
+
 
 chapter information
 
@@ -228,16 +232,75 @@ appendices as well (Appendix A and B).
 chapter target
 
 \section{Logistic Organ Dysfunction Score}
-organ dysfunction, lods
+Scoring system used in ICU can be broadly divided into two types, specific for an organ or disease and generic for all ICU patients. The generic scores can be divided into outcome risk prediction scores, which assess disease severity on admission and is used to predict outcome (for example, Acute Physiology and Chronic Health Evaluation (APACHE), Mortality Probability Model (MPM)), and organ dysfunction scoring systems which assesses the presence and severity of organ dysfunction (for example, Multiple Organ Dysfunction (MODS), Sequential Organ Failure Assessment (SOFA)). \parencite{Tiffany21, Vincent2010, sekulic2015}
+
+Logistic Organ Dysfunction Score is initially proposed by \textcite{legall96} with a database of 13,152 admissions to 137 ICUs in 12 countries. Twelve variables were selected by multiple logistic regression to represent the function of six organ systems (neurologic, cardiovascular, renal, pulmonary, hematologic, hepatic). The worst value for each variable within 24 hours of ICU admission are ranked to a scale that considers no dysfunction with 0 to maximum dysfunction with 5. LODS is a weighted system: the maximum score allowed for the respiratory and coagulation is 3, and the maximum score for liver is 1. Therefore, LODS value ranges from 0 to 22, as Table \ref{table:lods}. LODS is considered as a hybrid organ dysfunction and outcome risk prediction scoring system as it combines a global score summarizing the total degree of organ dysfunction of the organ systems, and a logistic regression equation that can convert the score to a probability of mortality. \parencite{Tiffany21, Vincent2010, sekulic2015}
+
+\begin{equation*}
+Predicted Death Rate = (e^{-3.4043 + 0.4173*(LODS)} ) / ( 1 +  e^{-3.4043 + 0.4173*(LODS)} )
+\end{equation*}
+
+LODS was originally developed for the first 24 hours of ICU stay, it is also validated as an accurate organ dysfunction score in the first 7 days of ICU stay by \textcite{Timsit2002} in a study of 1,685 patients in French ICUs. 
+
+
+\begin{landscape}
+    \begin{table}[]
+    \begin{threeparttable}
+        \caption{Logistic Organ Dysfunction Score.}
+        \label{table:lods}
+        \begin{tabular}{lllllllll}
+            \hline
+            \textbf{Organ system} & \textbf{Parameter} & \textbf{5} & \textbf{3} & \textbf{1} & \textbf{0} & \textbf{1} & \textbf{3} & \textbf{5} \\
+            \hline
+            Neurologic & GCS\tnote{1} & 3-5 & 6-8 & 9-13 & 14-15 & - & - & - \\
+            Cardiologic & HR\tnote{2} (beats/min) & \textless 30 & - & - & 30-139 & 140 & - & - \\
+             &  &  & or &  &  & and & or &  \\
+             & SBP\tnote{3} (mmHg) & \textless 40 & 40-69 & 70-89 & 90-239 & 240-269 & $\geq$270 & - \\
+            Renal & Urea nitrogen (mmol/l) & - & - & - & \textless{}6 & 6-9.9 & 10-19.9 & $\geq$20 $\geq$ 1.20 \\
+             & (g/l) &  &  &  & \textless{}0.36 & 0.36-0.59 & 0.60-1.19 &  \\
+             &  &  &  & and & or & or &  &  \\
+             & Creatinine ($\mu$mol/l) & - & - & - & \textless{}106 & 106-140 & $\geq$141 & - \\
+             & (mg/dl) &  &  &  & \textless{}1.20 & 1.20-1.59 & $\geq$1.60 &  \\
+             &  &  &  & and &  & or &  &  \\
+             & Urine output (l) & \textless{}0.5 & 0.5-0.74 & - & 0.75-9.99 & - & \textgreater{}=10 &  \\
+            Pulmonary & PaO2 mmHg/FiO2 (on MV or CPAP) &  & \textless{}150 & $\geq$150 & no MV no CPAP & - & - & - \\
+             & PaO2 kPa/FiO2 & - & \textless{}19.9 & $\geq$19.9 & no IPAP & - & - & - \\
+            Hepatic & Bilirubin ($\mu$mol/l) & - & - & - & \textless{}34.2 & $\geq$34.2 & - & - \\
+             & (mg/dl) &  &  &  & \textless{}2.0 & $\geq$2.0 &  &  \\
+             &  &  &  &  & and & or &  &  \\
+             & PT\tnote{4}time (secs) & - & - & - & $\leq$3 & \textgreater{}3 & - & - \\
+             & above standard (\%) &  &  & \textless{}25 & 25 &  &  &  \\
+            Hematologic & Leukocytes (× 10 9/l) & - & \textless{}1.0 & 1.0-2.4 & 2.5-49.9 & $\geq$50.0 & - & - \\
+             &  &  &  & or & and &  &  &  \\
+             & Platelets (109/l) & - & - & - & \textless{}50 & \textgreater{}=50 &  &  \\
+             \hline
+        \end{tabular}
+        \begin{tablenotes}
+            \item[1] GCS: Glasgow coma scale; 
+            \item[2] HR: heart rate; 
+            \item[3] SBP: systolic blood pressure;        
+            \item[4] PT: prothrombin
+        \end{tablenotes}
+        \end{threeparttable}
+    \end{table}
+\end{landscape}
+
 \section{Machine Learning}
 machine learning situation,
 electric devices with much data produced in icu stays.
 
-\section{complex system}
 
 
 \chapter{Prior Work}
 \label{ch:priorwork}
+Mathematics and machine learning have been brought to ICU severity prediction and estimation in many research, however, most of them focus on combine laboratory and vital sign measurements together to predict mortality. There are some studies that use bedside data to estimate or predict patients' situation.
+
+\textcite{asuroglu2021} proposed a deep learning approach to monitor sepsis onset by estimating SOFA score.
+
+\textcite{johnson2013} used 11 bedside variables propose a score system called Oxford Acute Severity of Illness Score (OASIS) to estimate patients' situation in the first day of ICU stay. It uses the worst value of 11 variables in the first 24 hours in ICU stay, which conduct a scale from 0 to 73. OASIS also includes an equation to convert score to mortality. A research in China validated that OASIS have better accuracy than Sequential Organ Function Assessment (SOFA) and Logistic Organ Dysfnction Score (LODS) in mortality prediction of patients with sepsis in ICU. \parencite{hu2020} 
+
+\textcite{el-manzalawy2021} used 10 variables on OASIS and machine learning model to propose a new OASIS+ score system.
+
 
 Tunc,
 OASIS
@@ -248,6 +311,11 @@ chinese with non-invasive parameters
 \label{ch:methods}
 
 \section{Dataset}
+The Medical Information Mart for Intensive Care (MIMIC)-IV database version 2.2 is used in this research. \parencite{johnson2023} The MIMIC IV dataset is the updated version of the MIMIC III created in 2020. It comprises deidentified health-related data from patients who were admitted to the critical care units of the Beth Israel Deaconess Medical Center (BIDMC) in 2008-2019 in Boston Massachusetts. The dataset consists of 73,181 ICU stay records, vital sign and laboratory measurements of these records are all included. MIMIC IV is deidentified and patient identifiers were removed according to the Health Insurance Portability and Accountability Act (HIPAA) Safe Harbor provision.
+
+A waiver of informed consent and approved the data sharing initiative by the Institutional Review Board at the Beth Israel Deaconess Medical Center, who reviewed the collection of patient information and creation of the research resource. \parencite{johnson2023}
+
+
 \section{Models}
 \subsection{XGBoost}
 \subsection{Random Forest}
@@ -596,7 +664,7 @@ refer to the code in the text.
 
 LaTeX has a package listings \cite{heinz06} which can handle code
 very conveniently, include real code files, add row numbers, and
-highlight the reserved words.  Program~\ref{code:sort} shows another
+highlight the reserved words.  Program shows another
 example which is included from a separate file
 \textit{example\_code.c}, and includes both line numbers and a code
 numbering.
