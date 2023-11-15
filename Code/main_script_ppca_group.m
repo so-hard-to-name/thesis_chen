@@ -1,5 +1,5 @@
 % Load the CSV file
-data = readtable('data_all12h_vitalsign_demo.csv'); % Replace 'your_data.csv' with the actual file path
+data = readtable('filtered_data1.csv'); % Replace 'your_data.csv' with the actual file path
 
 % Get unique IDs to create groups
 uniqueIDs = unique(data.stay_id);
@@ -19,7 +19,7 @@ for i = 1:length(uniqueIDs)
     % Extract the data columns for imputation
     dataColumns = currentGroup{:, 6:27};
     array = dataColumns;
-    [C, ss, M, X,Ye] = ppca_mv(array,2,1);
+    [C, ss, M, X,Ye] = ppca_mv(array,2,0);
     imputedDataColumns = array2table(Ye);
     disp(imputedDataColumns);
     disp('line break');

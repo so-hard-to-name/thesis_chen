@@ -7,6 +7,8 @@ from sklearn.metrics import mean_absolute_error
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
 import matplotlib.pyplot as plt
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
 
 # Read the CSV file into a DataFrame
 data = pd.read_csv('data12h.csv')
@@ -60,6 +62,21 @@ xgb_model = xgb.XGBRegressor(n_estimators=100, max_depth=3)
 
 # Train the model
 xgb_model.fit(X_train, y_train)
+
+k = 10
+cv = KFold(n_splits=k, shuffle=True, random_state=42)
+
+# Perform cross-validation
+mae_scores = -cross_val_score(xgb_model, X_selected, target, cv=cv, scoring='neg_mean_absolute_error')
+rmse_scores = -cross_val_score(xgb_model, X_selected, target, cv=cv, scoring='neg_root_mean_squared_error')
+
+# Print the cross-validation scores
+print("Cross-Validation MAE scores:", mae_scores)
+print("Average MAE:", mae_scores.mean())
+
+print("Cross-Validation RMSE scores:", rmse_scores)
+print("Average RMSE:", rmse_scores.mean())
+
 
 # Make predictions on the test set
 y_pred = xgb_model.predict(X_test)

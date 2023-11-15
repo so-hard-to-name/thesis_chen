@@ -2,12 +2,12 @@ import pandas as pd
 import numpy as np
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import mean_absolute_error
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
 
 # Load the dataset into a pandas DataFrame
 data = pd.read_csv('data12h.csv')
@@ -26,31 +26,42 @@ data['spo2'] = np.where(abs(data['spo2_min'] - 98) >= abs(data['spo2_max'] - 98)
 features = data[['sex','age','heart_rate', 'sbp', 'dbp', 'mbp', 'resp_rate' , 'temperature', 'spo2', 'urineoutput', 'gcs_value', 'gcs_motor', 'gcs_eyes', 'ventilation_code']]
 target = data['lods']
 
-# Calculate Spearman correlation for each feature
-correlations = []
-for feature in features.columns:
-    corr, _ = spearmanr(features[feature], target)
-    correlations.append((feature, abs(corr)))
+# # Calculate Spearman correlation for each feature
+# correlations = []
+# for feature in features.columns:
+#     corr, _ = spearmanr(features[feature], target)
+#     correlations.append((feature, abs(corr)))
 
-correlations.sort(key=lambda x: x[1], reverse=True)
-
-# Print Spearman correlation coefficients
-print("Spearman Correlation Coefficients:")
-for feature, corr in correlations:
-    print(f"{feature}\t\t{corr:.8f}")
-
-# correlations, _ = spearmanr(features, target)
+# correlations.sort(key=lambda x: x[1], reverse=True)
 
 # # Print Spearman correlation coefficients
 # print("Spearman Correlation Coefficients:")
-# for i, feature in enumerate(features.columns):
-#     print(f"{feature}: {correlations[i]}")
+# for feature, corr in correlations:
+#     print(f"{feature}\t\t{corr:.8f}")
+
+#    Pearson Correlation
+correlation_matrix = features.corr()
+
+# Print the correlation matrix
+print(correlation_matrix)
+
+correlations = []
+for feature in features.columns:
+    correlation, _ = pearsonr(features[feature], target)
+    correlations.append((feature, abs(correlation)))
+
+# Sort the features based on their correlation strength
+correlations.sort(key=lambda x: x[1], reverse=True)
+
+print("Feature\t\t\tCorrelation")
+for feature, correlation in correlations:
+    print(f"{feature}\t\t{correlation:.8f}")
 
 # Extract the feature names in the ranked order
 ranked_features = [feat for feat, _ in correlations]
 
 # Select the top features for training
-top_features = ranked_features[:14]  # Adjust the number of top features as needed
+top_features = ranked_features[:13]  # Adjust the number of top features as needed
 
 # Subset the data with the top features
 X_selected = features[top_features]
@@ -61,21 +72,37 @@ X_train, X_test, y_train, y_test = train_test_split(X_selected, target, test_siz
 # Create a linear regression object
 regressor = LinearRegression()
 
-# Train the model using the training data
-regressor.fit(X_train, y_train)
 
-# Predict on the test data
-y_pred = regressor.predict(X_test)
+# Define the number of folds for cross-validation
+k = 10
+cv = KFold(n_splits=k, shuffle=True, random_state=42)
 
-# Calculate RMSE
-rmse = mean_squared_error(y_test, y_pred, squared=False)
-print('Root Mean Squared Error:', rmse)
-mae = mean_absolute_error(y_test, y_pred)
-print('Mean Absolute Error:', mae)
+# Perform cross-validation
+mae_scores = -cross_val_score(regressor, X_selected, target, cv=cv, scoring='neg_mean_absolute_error')
+rmse_scores = -cross_val_score(regressor, X_selected, target, cv=cv, scoring='neg_root_mean_squared_error')
+
+# Print the cross-validation scores
+print("Cross-Validation MAE scores:", mae_scores)
+print("Average MAE:", mae_scores.mean())
+
+print("Cross-Validation RMSE scores:", rmse_scores)
+print("Average RMSE:", rmse_scores.mean())
+
+# # Train the model using the training data
+# regressor.fit(X_train, y_train)
+
+# # Predict on the test data
+# y_pred = regressor.predict(X_test)
+
+# # Calculate RMSE
+# rmse = mean_squared_error(y_test, y_pred, squared=False)
+# print('Root Mean Squared Error:', rmse)
+# mae = mean_absolute_error(y_test, y_pred)
+# print('Mean Absolute Error:', mae)
 
     # Predicted vs Actural
-plt.scatter(y_pred, y_test)
-plt.xlabel('Actual Values')
-plt.ylabel('Predicted Values')
-plt.title('Predicted vs. Actual Plot')
-plt.show()
+# plt.scatter(y_pred, y_test)
+# plt.xlabel('Actual Values')
+# plt.ylabel('Predicted Values')
+# plt.title('Predicted vs. Actual Plot')
+# plt.show()

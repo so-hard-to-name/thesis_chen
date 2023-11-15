@@ -1,4 +1,4 @@
-dataall12hvitalsigndemo = readtable('data_all12h_vitalsign_demo.csv');
+dataall12hvitalsigndemo = readtable('filtered_data1.csv');
 columns = 6:27;
 
 data = dataall12hvitalsigndemo(:, columns);

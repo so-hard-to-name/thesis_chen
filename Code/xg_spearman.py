@@ -7,6 +7,8 @@ from sklearn.metrics import mean_absolute_error
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
 import matplotlib.pyplot as plt
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
 
 # Load your dataset into a pandas DataFrame
 data = pd.read_csv('data12h.csv')
@@ -38,18 +40,11 @@ print("Spearman Correlation Coefficients:")
 for feature, corr in correlations:
     print(f"{feature}\t\t{corr:.8f}")
 
-# correlations, _ = spearmanr(features, target)
-
-# # Print Spearman correlation coefficients
-# print("Spearman Correlation Coefficients:")
-# for i, feature in enumerate(features.columns):
-#     print(f"{feature}: {correlations[i]}")
-
 # Extract the feature names in the ranked order
 ranked_features = [feat for feat, _ in correlations]
 
 # Select the top features for training
-top_features = ranked_features[:11]  # Adjust the number of top features as needed
+top_features = ranked_features[:14]  # Adjust the number of top features as needed
 
 # Subset the data with the top features
 X_selected = features[top_features]
@@ -58,6 +53,20 @@ X_selected = features[top_features]
 X_train, X_test, y_train, y_test = train_test_split(X_selected, target, test_size=0.2, random_state=42)
 # Create the XGBoost model
 xgb_model = xgb.XGBRegressor(n_estimators=100, max_depth=3)
+
+k = 10
+cv = KFold(n_splits=k, shuffle=True, random_state=42)
+
+# Perform cross-validation
+mae_scores = -cross_val_score(xgb_model, X_selected, target, cv=cv, scoring='neg_mean_absolute_error')
+rmse_scores = -cross_val_score(xgb_model, X_selected, target, cv=cv, scoring='neg_root_mean_squared_error')
+
+# Print the cross-validation scores
+print("Cross-Validation MAE scores:", mae_scores)
+print("Average MAE:", mae_scores.mean())
+
+print("Cross-Validation RMSE scores:", rmse_scores)
+print("Average RMSE:", rmse_scores.mean())
 
 # Train the model
 xgb_model.fit(X_train, y_train)

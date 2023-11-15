@@ -56,11 +56,12 @@ k = 10
 cv = KFold(n_splits=k, shuffle=True, random_state=42)
 
 # Perform cross-validation
-scores = cross_val_score(xgboost_model, X_selected, target, cv=cv, scoring='neg_mean_absolute_error')
-
-# Convert the scores to positive values
-scores = -scores
+mae_scores = -cross_val_score(xgboost_model, X_selected, target, cv=cv, scoring='neg_mean_absolute_error')
+rmse_scores = -cross_val_score(xgboost_model, X_selected, target, cv=cv, scoring='neg_root_mean_squared_error')
 
 # Print the cross-validation scores
-print("Cross-Validation MAE scores:", scores)
-print("Average MAE:", scores.mean())
+print("Cross-Validation MAE scores:", mae_scores)
+print("Average MAE:", mae_scores.mean())
+
+print("Cross-Validation RMSE scores:", rmse_scores)
+print("Average MAE:", rmse_scores.mean())
