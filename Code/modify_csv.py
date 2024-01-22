@@ -3,10 +3,10 @@ import csv
 
 # open input CSV file as source 
 # open output CSV file as result 
-with open("imputed_li_copy.csv", "r") as source: 
+with open("imputed_ppca_group.csv", "r") as source: 
 	reader = csv.reader(source) 
 	
-	with open("imputed_li_modified.csv", "w") as result: 
+	with open("imputed_ppca_group_modified.csv", "w") as result: 
 		writer = csv.writer(result) 
 		for r in reader: 
 			
