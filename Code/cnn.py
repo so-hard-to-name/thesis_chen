@@ -166,16 +166,31 @@ for df in groups:
 # 5. define the model
 # Assuming a simple CNN architecture
 model = models.Sequential([
-    layers.Reshape((7, 1), input_shape=(7,)),
-    layers.Conv1D(32, 3, activation='relu'),
-    layers.MaxPooling1D(2),
+    layers.Reshape((12, 8, 1), input_shape=(12, 8)),
+    
+    # 1D Convolutional Layers
+    layers.Conv2D(32, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    
+    # Recurrent Layers (LSTM or GRU)
+    layers.LSTM(64, activation='tanh', return_sequences=True),
+    layers.LSTM(64, activation='tanh'),
+    
+    # Flatten the output
     layers.Flatten(),
+    
+    # Dense Layers
     layers.Dense(64, activation='relu'),
-    layers.Dense(1, activation='sigmoid')  # Assuming binary classification
+    
+    # Output Layer
+    layers.Dense(1, activation='linear')  # Assuming you are doing regression, adjust for your task
+
 ])
 
 # Compile the model
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'])
 
 # Train the model using the organized data
 for df_id, data in data_dict.items():
