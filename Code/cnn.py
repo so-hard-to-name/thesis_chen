@@ -163,6 +163,9 @@ for df in groups:
     X, y = preprocess_data(df)
     data_dict[df_stayid] = {'X': X, 'y': y}
 
+all_x = [entry['X'][0] for entry in data_dict.values()]
+all_y = [entry['y'] for entry in data_dict.values()]
+
 # 5. define the model
 # Assuming a simple CNN architecture
 # input_shape = (12, 8, 1)   
@@ -191,7 +194,6 @@ for df in groups:
 
 
 # Train the model using the organized data
-for df_id, data in data_dict.items():
-    X_train, X_test, y_train, y_test = train_test_split(data[['X']], data['y'], test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(all_x, all_y, test_size=0.2, random_state=42)
 
-    # model.fit(X_train, y_train, epochs=10, batch_size=32, validation_data=(X_test, y_test))
+# model.fit(X_train, y_train, epochs=10, batch_size=32, validation_data=(X_test, y_test))
