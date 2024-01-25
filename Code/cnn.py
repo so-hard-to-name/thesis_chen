@@ -165,35 +165,33 @@ for df in groups:
 
 # 5. define the model
 # Assuming a simple CNN architecture
-model = models.Sequential([
-    layers.Reshape((12, 8, 1), input_shape=(12, 8)),
-    
-    # 1D Convolutional Layers
-    layers.Conv2D(32, (3, 3), activation='relu'),
-    layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(64, (3, 3), activation='relu'),
-    layers.MaxPooling2D((2, 2)),
-    
-    # Recurrent Layers (LSTM or GRU)
-    layers.LSTM(64, activation='tanh', return_sequences=True),
-    layers.LSTM(64, activation='tanh'),
-    
-    # Flatten the output
-    layers.Flatten(),
-    
-    # Dense Layers
-    layers.Dense(64, activation='relu'),
-    
-    # Output Layer
-    layers.Dense(1, activation='linear')  # Assuming you are doing regression, adjust for your task
+# input_shape = (12, 8, 1)   
+# model = models.Sequential()
 
-])
+# # Conv1D layer with 32 filters, kernel size 3, activation 'relu'
+# model.add(layers.Reshape((12, 8, 1), input_shape=input_shape))
 
-# Compile the model
-model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'])
+# # Conv2D layer with 32 filters, kernel size (3, 3), activation 'relu'
+# model.add(layers.Conv2D(32, kernel_size=(3, 3), activation='relu'))
+
+# # MaxPooling2D layer with pool size (2, 2)
+# model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+
+# # Flatten the output before feeding it to dense layers
+# model.add(layers.Flatten())
+
+# # Dense layer with 64 units and activation 'relu'
+# model.add(layers.Dense(64, activation='relu'))
+
+# # Output layer with 1 unit (assuming regression) and linear activation
+# model.add(layers.Dense(1, activation='linear'))
+
+# # Compile the model
+# model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'])
+
 
 # Train the model using the organized data
 for df_id, data in data_dict.items():
-    X_train, X_test, y_train, y_test = train_test_split(data['X'], data['y'], test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(data[['X']], data['y'], test_size=0.2, random_state=42)
 
-    model.fit(X_train, y_train, epochs=10, batch_size=32, validation_data=(X_test, y_test))
+    # model.fit(X_train, y_train, epochs=10, batch_size=32, validation_data=(X_test, y_test))
