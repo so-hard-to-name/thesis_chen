@@ -45,6 +45,7 @@ autocite=inline
 \usepackage{csquotes}
 \usepackage{lscape} 
 \usepackage{threeparttable}
+\usepackage{amsfonts}
 
 \addbibresource{thesis_refs.bib} %Imports bibliography file
 
@@ -149,9 +150,11 @@ April 2019
 % Abstract and keywords
 % ---------------------------------------
 
-\noindent Logistic Organ Dysfunction Scale (LODS), with weighted variables with the worst values in first 24h, is an organ dysfunction score system which reflects severity level within an organ system and among organ systems. It is considered as an outcome risk prediction scoring system as well, since an equation is included that converts LODS into probability of mortaility. In some research, it is confirmed to be usable for the first 7 days in ICU, and is widely used in other departments as well. LODS calculation needs some labrotary results, such as bilirubin, which cost time and money.
+\noindent Intensive Care Unit (ICU) is a high-stakes environment in hospital, where patients are in higher danger than other departments, for instance organ dysfunction, and monitored with devices and more care worker. Effectively predicting patient status in an ICU is a critical task serving patient health and resource allocation Logistic Organ Dysfunction Scale (LODS), with weighted variables with the worst values in first 24h, is an organ dysfunction score system which reflects severity level within an organ system and among organ systems. It is considered as an outcome risk prediction scoring system as well, since an equation is included that converts LODS into probability of mortality. It is confirmed to be usable for the first 7 days in ICU, and is widely used in other departments as well. LODS calculation needs some laboratory results, such as bilirubin, which cost time and money. Effective prediction of LODS value could measure patient overall organ dysfunction situation and calculate probability of mortality for patient.
 
-\noindent This thesis is to propose a machine learning model to predict LODS with data that can be accquired from bedside in first 12 hours of ICU stay, to save time and assist doctor in treatment.
+\noindent Large amount data from ICU, why machine learning? 
+
+\noindent There are a little researches predict LODS with both laboratory result and bedside data. This thesis is to propose a machine learning model, trained with the Medical Information Mart for Intensive Care (MIMIC) -IV database, to predict LODS with data that can be acquired from bedside in first 12 hours of ICU stay, to save time and assist doctor in treatment.
 
 
 
@@ -212,20 +215,11 @@ Machine learning is a branch of artificial intelligence, broadly defined as the 
 Medical score system needs accuracy to reflect patients’ condition, and ease of use to reduce clinician time in using and learning. Only if a score system is substantially better than another one, proved by a large number of research, it will be used in practice. So improving an existed score system is more feasible than replacing, and change should be small but useful. LODS esitmates with the worst value of the first 24 hours of ICU stay, both bedside and laboratory measurements, which cost money and time. This research would use only bedside data because they are easy to access, without long-time waiting or money cost. And for some dangerous patients, 24 hours is a long time to collect data. If 24h severity can be predicted early, doctors will be able to change the treatment. LODS is a hybrid scoring system which makes it a good tool in this prediction. As human physiology comprises a complex system, using mathematical models to analyse organ dysfunction may describe systemic host response to infection or injury. \parencite{seely2011} So in this research, machine learning is brought to bedside to predict patients' severity by predicting LODS. ICU has many monitoring devices and produces a large amount lab test results which is a great resource for machine learning model training and research.
 
 
-chapter information
-
-This document is structured as follows. Chapter~\ref{ch:style}
-discusses briefly the basics of writing and presentation style
-regarding the text, figures, tables and mathematical
-notations. Chapters~\ref{sec:ref_styles} and \ref{ch:concl} summarize
-the referencing basics and the whole document. There are two example
-appendices as well (Appendix A and B).
-% ~\ref{app:A} and \ref{app:B}). Labels do not with \chapter*
 
 \chapter{Background}
 \label{ch:background}
 
-chapter target
+
 \section{Severity Scoring systems}
 In critical care, physiology-based scoring systems applied much more than diagnosed-based scoring systems, because sometimes no diagnoses are made on admission and patients in ICU can have more than one organ failure where diagnose-based scoring system is inapplicable. \parencite{Bouch2008} Severity scores are divided into those calculated with data obtained in the first day of ICU admission (for example, the mortality prediction model (MPM)), and those calculated with data collected sequentially throughout the duration of ICU stays (for example, the Sequential Organ Function Assessment (SOFA)). 
 
@@ -294,6 +288,10 @@ LODS was originally developed for the first 24 hours of ICU stay, but it is also
 Machine learning is usually divided into three types, 1) supervised training whose goal is to learn mapping from inputs to outputs, 2) unsupervised training whose goal is to find "interesting pattern" in the input data, 3) and reinforcement learning which is useful in learning how to give reward and punishment. In this thesis, we will focus on supervised training. Two most common categories of supervised training are classification and regression. Classification is widely used when outputs are categorical, such as Male and Female. Labels and outputs in regression are finitely discrete and continuous, respectively, such as the age a viewer of a video in YouTube. In this thesis, we focus on mapping measurements of patients’ situation to the LODS value. Typically, the measurements are referred to as features, while the LODS are referred to the target variable. Besides algorithm and model, training process also needs a notion called loss. In most cases, the machine learning tries to minimise the loss between expectation and real target in the training dataset. However, the objective of a model is not performing well in the training set, but in the unseen data. Generally, to archive this target, a three-way split is performed on the dataset, training set, validation set and test set. The goal is to maximise the performance of model in the test set. The main use of validation set is to choose the hyperparameters of the model, which are not optimized by the learning algorithm. Regularisation parameter is an important class of hyperparamenter to control under-fitting and over-fitting on training set. Under-fitting refers to that model learns too crude between predictors and targets, while overfitting refers to learning too complex. Both situation can be diagnosed by comparing training error and validation error. Underfitting is associated with high error in both training and validation, while overfitting is associated with low error in training but high error in validation. Both situation will cause high error in test set which is called generalisation error. Regularisation aims to balance the underfitting and over fitting. Bias and variance are widely checked in regression. Bias checks if the parameters entered the true parameters, and variance checks the spread level of the parameters. Both are inevitable, so the target is to balance the bias and variance to get an optimal model.
 Another way to choose hyper parameter is to perform cross validation. A common form of cross validation is K-fold validation. Instead of a single training and validation set, K folds training and validation sets are formed by partitioning the available dataset. Each set is used as validation set at a time and others are used as training set. At the end, the averaged validation error is obtained to monitor the training performance. 
 
+\subsection{Bias and Variance}
+\subsection{Under-fitting and Over-fitting}
+\subsection{Neural Network}
+
 
 
 \chapter{Prior Work}
@@ -319,15 +317,220 @@ MIMIC-IV is created in 3 steps, 1) acquisition, to acquire the data from clinic 
 \subsection{Inclusion Data Criteria}
 In this thesis, measurements of  twelve different vital signs were collected first 12 hours in ICU. These measurements include heart rate, systolic and diastolic blood pressure, mean blood pressure, respiratory rate, temperature, oxygen saturation, urine output, ventilation status, Glasgow Coma Scale, Glasgow Coma Scale eye opening and Glasgow Coma Scale Motor. The maximum, minimum and average value of the first seven measurements in each hour of first 12 hours are collected. The total urine output of 12 hours is collected. And the worst value of the rest in 12 hours are collected. Ventilation status are, start from most dangerous, tracheostomy, invasivevent, non-invasivevent, HFNC, supplementalOxygen and none.
 
-Three additional inclusion criteria are applied when prepare the dataset: 1) patients are aged over 18, 2) patients staysed in ICU for more than 24 hours so that there is LODS value calculated, 3) for each vital sign, there are at least one measured value in the first 12 hours. As a result, there are 8034 records included in this study.
+Three additional inclusion criteria are applied when prepare the dataset: 1) patients are aged over 18, 2) patients stayed in ICU for more than 24 hours so that there is LODS value calculated, 3) for each vital sign, there are at least one measured value in the first 12 hours. As a result, there are 8034 records included in this study.
+
+\section{Correlation Coefficient}
+Correlation coefficient is a statistical measure that expresses the linear relationship and direction of two variables, meaning that they can move together at a constant rate. It ranges from -1 to 1, where 0 means no correlation. The coefficient larger than 0 is positive correlation and lower than 0 is negative correlation. The large correlation is indicated with large absolute value of correlation coefficient. Here we will introduce two correlation coefficient
+
+\subsection{Pearson Correlation}
+Pearson correlation, denoted by "r", is a measure of relations between two continuous variables, which is commonly used in linear relationship. It means when one variable increases, another variable will increase (positive correlation) as well, or decrease (negative correlation) as well. The Pearson correlation coefficient value is the actual coefficient value. It is widely used to measure correlation of two variables. However it is very sensitive to outliers, which can potentially misleading the interpretation of the relationship. The formula of Pearson Correlation is
+\begin{equation*}
+  r =
+  \frac{ \sum_{i=1}^{n}(x_i-\bar{x})(y_i-\bar{y}) }{%
+        \sqrt{\sum_{i=1}^{n}(x_i-\bar{x})^2}\sqrt{\sum_{i=1}^{n}(y_i-\bar{y})^2}}
+\end{equation*}
+Besides assessing correlation, Pearson correlation also has utility in gauging ML model efficacy, where values predicted by models are compared with real values. Hence, it was used in models predicted postprandial glucose. \parencite{kirk2021} 
+
+\subsection{Spearman Correlation}
+Spearman correlation coefficient, denoted by \(\rho\), is a measure of monotonic relationship between two variables. It is suitable for ordinal or non-normally distributed data. Rather than actual coefficient value, Spearman correlation coefficient is based on the ranks of the data. It assesses the whether variables change together, a constant rate of which is not necessary. The formula of Spearman Correlation is
+\begin{equation*}
+    \rho = 1- {\frac {6 \sum d_i^2}{n(n^2 - 1)}}
+\end{equation*}
+where \textit{d} is the difference between the ranks of corresponding variables and \textit{n} is the number of data points. It is robust to outliers since it operates on ranks, instead of actual data. As the number of data points is also a parameter in the formula, it affects the precision. It act less precise with small size data than large size. Spearman correlation is commonly used when  the relationship between variables cannot be assumed to be linear.
+
+In this research, to get a good correlation measurement, both coefficients are used to check the relationship between variables and target, LODS value.
 
 \section{Missing Data Imputation}
-\subsection{Linear}
-\subsection{PPCA}
+In real world, data missing is a common problem in machine learning. Most classifiers do not work correctly when input data contains empty elements.
+There are three types of missing data, classified by \textcite{rubin1976}
+1. Missing Completely at Random (MCAR), where the probability of being missing is same for all data and does not depend on known values or the missing value itseld. It means that the causes of the missing data are not related to data. For instance, a data table was printed without missing values, but someone accidentally dropped on it, which caused some cells are not readable. The probability of each cell be dropped is same. In this situation, the missing data could be considered as following the same distribution as the known values, and many of the complexities would be ignored consequently apart from the obvious loss of information.
+2. Missing at Random (MAR), where the probability of being missing is same only within the groups defined by observed data, and depends on the known values but not on value itself. MAR class contains broader than MCAR. For instance, when someone dropped 1ml ink on a printed data table and 100ml ink on the same printed table, which caused some cells are not readable. The probabilities of each cell being unreadable are different in the two situations. MAR is more general than MCAR, which causes that modern missing data methods generally start from the MAR assumption.
+3. Not Missing at Random (NMAR), where the probability of being missing is unknown and depend on the value of variable itself. In NMAR, missing data likely contains potentially valuable information. For instance, a printed data table has several specific rows are are covered with ink. Then those rows are not missing at random and contain information. NMAR is the more complex than the other two cases, strategies to handle that are finding more data to figure out the causes, or performing what-if analyses to check how sensitive the results are under different scenarios. \parencite{vanbuuren2018}
+\subsection{Linear Interpolation}
+Linear interpolation is an method for one-dimensional data interpolation. It bases on the two data points adjacent to the target point to estimate the data value in the one-dimensional data sequence. With the simplest linear interpolation, the target points are joined by straight line segment. As a result, each segment is interpolated independently and segments discontinue at each point. \parencite{huang2021, paul1999}
+In contrast, a smoother interpolating function is desirable. Cosine interpolation and Cubic interpolation are two simple methods.
+
+\subsection{Probabilistic Principal Component Analysis}
+Probabilistic Principal Component Analysis (PPCA) is a probabilistic extension of Principle Component Analysis (PCA). Here is an instruction of PCA and PPCA, comes from \textcite{lindsay2002} and \textcite{tipping2002}.
+Principle Component Analysis, developed by Karl Pearson in 1901, is a powerful dimensionality reduction technique that aims to transform high-dimensional data to low-dimensional space without losing most of the variance in the data. \parencite{mackiewicz1993} The variables in low-dimensional space are called principle components, which are linear combinations of original variables. This is achieved by finding the directions along which the variance of the data is maximized. It is used for data compression, dimensionality reduction and data visualization. Here to explain how Principle Component Analysis works in details.
+
+Standardization ensures that all variables are on same scale (normally 0 - 1) and prevents variables with large magnitudes from dominating the analysis, by subtracting the mean and dividing by the standard deviation of each variables. For each feature $X_i$ in the dataset, standardized value $Z_i$ should be calculated with:
+\begin{equation*}
+    {Z_i} = {\frac {{X_i}-{\mu_i}}{\sigma_i}}
+\end{equation*}
+where $\mu_i$ is the mean of feature $X_i$ and $\sigma_i$ is the standard deviation.
+
+Covariance Matrix provides relationship info between each pair of variables. It indicates how much two variables vary together, and a positive covariance indicates two variables tend to increase or decrease together, while a negative indicates an inverse relationship. Covariance Matrix is calculated on the standardized dataset by 
+\begin{equation*}
+    C = \frac{1}{n}\sum\limits_{k=1}^n (\pmb x_k - \pmb m)\;(\pmb x_k - \pmb m)^T
+\end{equation*}
+where $n$ is the number of observations and $m$ is the mean vector of the standardized data.
+
+Eigenvalue Decomposition, involves decomposing the covariance matrix into eigenvectors which represent the directions of maximum variance in the data, and eigenvalues which indicate the magnitude of variance along these directions. Each eigenvector correspond to a principle component, and the eigenvalue associated to is represents the amount of variance explained by that component. 
+
+Selection of Principle Components in PCA sorts the eigenvalues in descending order and selects the top k eigenvectors (consider as principle components) that correspond to the largest eigenvalues. These principle components capture most of the variability.
+
+Projection in PCA projects the original data onto a new orthogonal basis formed by the selected principle components. The transformation will create a new dataset where each observation is represented by a linear combination of the principle components.
+
+However, in Probabilistic Principle Component Analysis (PPCA), the principle components are treated as random variables. The observed data is generated by a linear transformation of a lower-dimensional latent space plus Gaussian noise. The latent space is dimensionally lower than the origin data space and captures the essential features of data. Maximum likelihood estimation or Bayesian inference is used to estimate the parameters of the model, including the latent variance space and the noise variance. With the estimated parameters, the latent space can be used for dimensionality reduction. 
+
+With a data set $X$ consisting of $N$ data points, each of dimension $D$. And the target lower-dimensional latent space $Z$ of dimension $M$ ($M$ < $D$). So, each data point $x_n$ is generated from $z_n$ through a linear transformation plus Gaussian noise:
+\begin{equation*}
+    {x_n} = {W}{z_n}+{\mu}+{\epsilon _n}
+\end{equation*}
+where $W$ is a $D$ $\times$ $M$ matrix of the loading vectors, representing the linear transformation from the latent space to the observed data space, $z_n$ is a $M$ -dimensional latent variable associated with n-th data point, $\mu$ is the mean of the data, and $\epsilon _n$ is Gaussian noise with mean zero and covariance matrix.
+In PPCA, the latent variables $z_n$ are assumed to follow a Gaussian distribution:
+\begin{equation*}
+    {z_n} \sim {\mathcal{N}}(0, {I})
+\end{equation*}
+where $I$ represents the identity matrix, which is a square matrix with ones on the diagonal and zeros elsewhere. Once the $W$, $\mu$, and $\sigma ^2$ are estimated by maximizing the log-likelihood function, the latent space $Z$ (a $M$$\times$ $N$ matrix containing the latent variables for all data points) can be obtained by:
+\begin{equation*}
+    {Z} = {W^T}{({W}{W^T}+{\sigma ^2}{I})^{-1}}({X}-{\mu}{1^T})
+\end{equation*}
+where 1 is a column vector of ones.
+
+To impute the missing data $x_{ij}$ in the observed data matrix $X$, the first step is to estimate the corresponding latent variable $z_{ij}$ with the estimated loading matrix $W$ and the latent space $Z$. Then reconstructing the missing entry  $x_{ij}$ can be done by
+\begin{equation*}
+    {x_{ij}} = {W_j}{z_{ij}}+{\mu _j}
+\end{equation*}
+where $W_j$ is the $j$ -th column of $W$ and $\mu_j$ is the $j$-th element of the mean vector $\mu$.
+
+
 \section{Models}
 \subsection{XGBoost}
-\subsection{Random Forest}
-\section{Correlation}
+Decision trees are powerful non-parametric classifiers and regressors which produce a recursive binary partitioning of the feature space. They build a flowchart-like tree structure where nodes represents features, branches represents decisions and leaf node represents the outcomes. When classifying new instances, decision tree locates the area where the instances lies and take a majority vote inside the area to determine the result, based on the training set, which results it low bias and high variance. XGBoost is an ensemble of decision trees using gradient boosting. In the following, we will examine how XGBoost actually works, according to \textcite{song2015, chen2016}
+
+Start with decision trees. Each tree is constructed by splitting the training data into subsets recursively based on attribute selection measures until the tree met a stopping criteria, such as the depth of a tree. Attribute selection measure (ASM) is used to evaluate the usefulness of different attributes for splitting a dataset, the goal of which is to determine the best attribute that will create the most homogeneous subset of data after splitting, thereby maximizing the information gain. This process is repeated in a recursive manner, called recursive partitioning, on each derived subset. When the subset at a node all has the same target value or when splitting does not add value, the recursion is completed. There are several commonly used attribute selection measures:
+
+Entropy, is the measure of the uncertainty or randomness in a set of elements, based on the distribution of class labels in the dataset. Entropy of each classified subset ${D}$ is calculated as
+\begin{equation*}
+    Entroy(D)=-\sum_{i = 1}^C {p_i} \log _2 {p_i}
+\end{equation*}
+where ${p_i}$ is the proportion of the data points that belong to class ${i}$ in subset ${D}$ , and ${C}$ is the number of classes. ${p_i}$ is calculated with
+\begin{equation*}
+    p_i = \frac{1}{n} \sum I(y=i)
+\end{equation*}
+where ${n}$ is the amount of data points in subset.
+A high entropy indicates a high maximum uncertainty. Therefore, the even distribution of class labels has the highest entropy. In contrast, low entropy indicates low randomness of the dataset. So, a completely homogeneous dataset has entropy value 0. Entropy is used to evaluate the the quality of a split, whose goal is to select attribute that minimizes the entropy of the resulting subset.
+
+Gini Impurity, measures the probability of incorrectly classifying a randomly chosen element if it was randomly labeled according to the distribution of class labels. It is calculated as 
+\begin{equation*}
+    Gini(D) = 1-\sum_{i=1}^C {p_i}^2
+\end{equation*}
+where ${p_i}$ is the proportion of the data points classified as ${i}$ in subset ${D}$, and ${C}$ is the number of classes. A lower Gini Impurity indicates more homogeneous, that a subset is predominately composed of data points belonging to same class, than a higher one. Moreover, information gain is also a commonly used measurement in decision tree algorithm of the reduction in entropy results from a split.
+
+Decision tree analyses the data set to predict its classification. It commences from the root node, the topmost node and starting point in a tree, where the algorithm compares the value of the root attribute and the attribute of the record in the actual data set. Then the algorithm proceeds to follow the branch and move to the next node. It repeats this action on each subsequent node until the leaf nodes of the tree. In each node, the algorithm finds the best attribute in the dataset with attribute selection measure. The total time of training a decision tree, include training and test is ${O_{(ndf)}}$, where ${n}$ is the amount of examples, ${f}$ is the feature amount and ${d}$ is the depth of the tree. 
+Decision trees are simple to understand as it follows the same process as a human makes decisions in real-life. Also, no domain knowledge or parameter setting is required to construct a decision tree, therefore it is appropriate for exploratory knowledge discovery. As its calculation focuses on the outcome of each split instead of the inputted features and it commonly process one attribute in each node, it can handle high-dimensional data. But a decision tree may have over-fitting issue due to its inherent nature of complex and highly branching structure to fit training data closely, especially with limited data and deep trees without depth limit, which memorize noise and outliers in the training data and grow until it perfectly fit the training data. Moreover, decision trees are sensitive to small variations in the training data, which causes decision trees are prone to high variance.
+
+To address some limitations of individual decision trees and improve the overall performance of a model, ensemble decision trees is created. Bagging and boosting are two common ensemble methods. Bagging ensembles decision trees that are trained in parallel on random subsets of the original dataset and then aggregates their individual results, by voting for classification tasks or averaging for regression tasks, to form a final result. This means that some instances may be repeatedly selected, however, some may be not selected at all, which introduces further randomness and decorrelation between trees. Also with the random selection of instances, the probability of overfitting is minimized and the stability is increased as the impact of outliers and noise are reduced. Random forest is a common used powerful tool based on bagging.
+
+Boosting is an iterative ensemble learning technique where decision trees are sequentially trained to correct the errors from previous trees. In each iteration, the new tree focuses on the instances that are misclassified or have high residuals by the previous trees and assigns those instances higher weights to emphasize their importance, while the correctly classified instances receive lower weights. This adaptive weighting scheme lets boosting to focus on the most challenging instances, gradually improving the overall performance of the ensemble. When combining predictions, boosting commonly uses weighted averaging, where the predictions of each decision tree are weighted by its performance during training, in regression task. Alternatively, in classification tasks, boosting uses a weighted majority vote where the weight of each tree depends on its accuracy in training. And it also has the advantages, as bagging, that minimizing the probability of overfitting and increasing the stability. Gradient boosting, derived from boosting, builds the ensemble sequentially by training each decision tree with the residuals of the previous tree's predictions. It optimizes a loss function by minimizing the errors of the ensemble on the training data. Regularization is also applied in boosting algorithm to prevent overfitting. XGBoost is based on gradient boosting, which ensembles regression trees, a type of decision tree used for regression tasks.
+
+Here we will explain mathematics theory of XGBoost. For a given data set with $m$ features and $n$ examples $D = \{(x_i, y_i)\}(|D|=n, x_i \in \mathbb{R}^m, y_i \in \mathbb{R})$ , the prediction is sum of each tree, in the form
+\begin{equation*}
+    \hat{y}_i=\phi\left(\mathbf{x}_i\right)=\sum_{k=1}^K f_k\left(\mathbf{x}_i\right), \quad f_k \in \mathcal{F}
+\end{equation*}
+where $K$ is the amount of trees, and $\mathcal{F}=\left\{f(\mathbf{x})=w_{q(\mathbf{x})}\right\}\left(q: \mathbb{R}^m \rightarrow T, w \in \mathbb{R}^T\right)$ is the space of regression trees. Here, $T$ is the number of leaves in a tree and $q$ represents the structure of the tree. $f_k$ represents each independent tree structure $q$ and leaf weights $w$, then the weight of $i$-th leaf is represented with $w_i$. The objective is to minimized the following
+\begin{equation*}
+    \begin{gathered}
+\mathcal{L}(\phi)=\sum_i l\left(\hat{y}_i, y_i\right)+\sum_k \Omega\left(f_k\right) \\
+\text { where } \Omega(f)=\gamma T+\frac{1}{2} \lambda\|w\|^2
+\end{gathered}
+\end{equation*}
+where $l$ is the loss function that measures the difference between the target $y_i$ and the prediction $\hat{y_i}$. The second part $\Omega$ is the regularization parameter, that is used to smooth the final learnt weights, to avoid over-fitting. Instead of learning all trees at once, the additive strategy is applied here to minimize the loss, summarised as below:
+\begin{equation*}
+    \begin{aligned}
+& \hat{y}_i^{(0)}=0 \\
+& \hat{y}_i^{(1)}=f_1\left(x_i\right)=\hat{y}_i^{(0)}+f_1\left(\mathbf{x}_i\right) \\
+& \hat{y}_i^{(2)}=f_1\left(\mathbf{x}_i\right)+f_2\left(\mathbf{x}_i\right)=\hat{y}_i^{(1)}+f_2\left(\mathbf{x}_i\right) \\
+& \cdots \\
+& \hat{y}_i^{(i)}=\sum_{k=1}^i f_k\left(\mathbf{x}_i\right)=\hat{y}_i^{(t-1)}+f_i\left(\mathbf{x}_i\right)
+\end{aligned}
+\end{equation*}
+Then, combine this to the objective function and apply taylor series expansion, the objective function will be:
+\begin{equation*}
+    \mathcal{L}(\phi)=\sum_{i=1}^n\left[l\left(y_i, \hat{y}_i^{(t-1)}\right)+q_i f_i\left(x_i\right)+\frac{1}{2} h_i f_i^2\left(x_i\right)\right]+\Omega\left(f_i\right)
+\end{equation*}
+
+where $g_i=\partial_{\hat{y}^{(t-1)}} l\left(y_i, \hat{y}^{(t-1)}\right)$ and $h_i=\partial_{\hat{y}^{(t-1)}}^2 l\left(y_i, \hat{y}^{(t-1)}\right)$. Then apply the regularization term which is defined earlier, the objective function becomes:
+\begin{equation*}
+    \begin{aligned}
+& \mathcal{L}(\phi) \approx \sum_{i=1}^n\left[g_i w_{q\left\{w_j\right)}+\frac{1}{2} h_i w_{q\left(i_i\right)}^2\right]+\gamma T+\frac{1}{2} \lambda \sum_{j=1}^T w_{i j}^2 \\
+= & \sum_{j=1}^T\left[\left(\sum_{i \in I_j} g_i\right) w_j+\frac{1}{2}\left(\sum_{i \in I_j} h_i+\lambda\right) w_j^2\right]+\gamma T \\
+= & \sum_{j=1}^T\left[G_j w_j+\frac{1}{2}\left(H_j+\lambda\right) w_j^2\right]+\gamma T
+\end{aligned}
+\end{equation*}
+where $G_j=\sum_{i \in I_j} g_i $ and $H_j=\sum_{i \in I_j} h_i$. The $w_j$ are independent of each other, the optimal weight $w_j^*$ of a fixed tree is
+\begin{equation*}
+w_j^*=-\frac{G_j}{H_j+\lambda}
+\end{equation*}
+and the corresponding optimal value is calculated by
+\begin{equation*}
+\mathcal{L}(\phi)=-\frac{1}{2} \sum_{j=1}^T \frac{G_j^2}{H_j+\lambda}+\gamma T
+\end{equation*}
+
+
+\subsection{Convolutional Neural Networks}
+All the aforementioned models have a simple two-layer architecture of the form input directly to output. However, there is a subset of machine learning, called deep learning, that uses multi-layer neural network to mimic the complex decision-making process of human brain. Neural networks make up the backbone of deep learning. Here we will start from neural network, according to \textcite{veena2024, stanford_cnn}. 
+
+Inspired by the structure and function of the brain, a neural network is a computational model that consists of  interconnected nodes or neurons, which are mathematical functions that perform a computation based on inputs and produce an output, in a layered structure. The layers between input and output layers are referred as hidden layers. Neurons inside each layer are not connected, but connected with neurons in subsequent layer through weighted connections. Each connection has an associated weight that determines the strength of the connection. The first step to start a basic feedforward neural network is initialization, where the weights $W$ are initialized randomly and bias $b$ are initialized to zeros. The second step is forward propagation, which passes the input data through each layer of the network, performs computations and produce an output. After data is inputted, the weighted sum of inputs for each neuron is computed in the hidden layers and output layer with
+\begin{equation*}
+    z^{(l)}=W^{(l)} \cdot a^{(l-1)}+b^{(l)}
+\end{equation*}
+where $z^{(l)}$ is the weighted sum of inputs for layer $l$, $W^{(l)}$ is the weight matrix for layer $l$, $a^{(l-1)}$ is the output of the previous layer and $b^{(l)}$ is the bias vector for layer $l$. An activation function applies to the weighted sum $z^{(l)}$ to get an output of each neuron:
+\begin{equation*}
+    a^{(l)}=\sigma\left(z^{(l)}\right)
+\end{equation*}
+The most common activation functions are sigmoid, tanh and softmax. They are used depending on the type of layer and task. Applying an activation function will introduce non-linearity into the network, which can capture complex patterns as the real-world datasets exhibit complex relationships that can not be modeled only by linear functions, and break symmetry in the network to prevent all neurons from learning the same representation. This process will be applied on each neuron of each hidden layer and output layer, and produce a predicted result $\hat{y}$ to compute loss between it and the actual $y$ with loss function $L(\hat{y}, y)$, which is the third step. One commonly used loss function is Mean Squared Error:
+\begin{equation*}
+    M S E=\frac{1}{n} \sum_{i=1}^n\left(y_i-\hat{y}_i\right)^2
+\end{equation*}
+where $n$ is the amount of examples. The objective is to minimize the loss. To archive this, backpropagation is applied by adjusting the weights and biases, typically with gradient descent. It starts from the output layer to compute the gradient of the loss:
+\begin{equation*}
+    \delta^{(L)}=\frac{\partial L}{\partial a^{(L)}} \cdot \sigma^{\prime}\left(z^{(L)}\right)
+\end{equation*}
+where $\frac{\partial L}{\partial a^{(L)}}$ is the gradient of loss function with respect to the activations, $\sigma^{\prime}$ is the derivative of the activation function, and $z^{(L)}$ is the weighted sum of inputs to the output layer. The same process is propagated through each layer to compute the gradient of the loss function with respect to the activations of the previous layer and the parameters of the current layer:
+\begin{equation*}
+    \begin{aligned}
+& \delta^{(l)}=\left(\left(W^{(l+1)}\right)^T \cdot \delta^{(l+1)}\right) \cdot \sigma^{\prime}\left(z^{(l)}\right) \\
+& \frac{\partial L}{\partial W^{(l)}}=\delta^{(l)} \cdot\left(a^{(l-1)}\right)^T \\
+& \frac{\partial L}{\partial b^{(l)}}=\delta^{(l)}
+\end{aligned}
+\end{equation*}
+where $\delta^{(l)}$ is the loss gradient at layer $l$. Then gradient descent is used to update parameters:
+\begin{equation*}
+    \begin{aligned}
+& W^{(l)}=W^{(l)}-\alpha \frac{\partial L}{\partial W^{(l)}} \\
+& b^{(l)}=b^{(l)}-\alpha \frac{\partial L}{\partial b^{(l)}}
+\end{aligned}
+\end{equation*}
+where $\alpha$ is the learning rate. The whole process, include forward propagation, backpropagation, and parameter update, is iterated to decide final parameters which produce the minimum loss and output.
+
+Convolutional Neural Network (CNN) is the extended version of feed forward neural network primarily used for analyzing visual imagery, and predominantly used to extract the feature from the grid-like matrix dataset, such as time-series data. It is designed to learn spatial hierarchies of features automatically and adaptively from input. CNN have achieved a state-of-the-art performance on a wide range of image and grid-like matrix related tasks. It consists of multiple layers, like input layer, convolutional layer which applies filters, pooling layer which reduce computation and fully connected layers which makes the final prediction. Here's a detailed breakdown of CNN layes with time-series data.
+
+Convolutional layer is the basic block of a CNN. It slides a filter over the input data and computes a result between the filter and the small range of the input data, with formula:
+\begin{equation*}
+    (I * K)(i, j)=\sum_m \sum_n I(i+m, j+n) \cdot K(m, n)
+\end{equation*}
+where $I$ is the input data which is commonly more than 1 dimension, $K$ is the filter, $(i, j)$ are the spatial coordinates of the feature map, and $(m, n)$ are the indices used for convolution operation. Here is an example of how convolution works.
+
+Activation function is applied on the new data produced from convolution element-wise to introduce non-linearity into the network as the normal neural network.
+
+Pooling layer is used to reduce the computational complexity and the number of parameters in the neural network, and also prevent overfitting. It is periodically inserted in the CNN. One commonly used technique is MaxPooling where the maximum value within a small window is taken as the output:
+\begin{equation*}
+    \operatorname{MaxPooling}(i, j)=\max \{I(i+m, j+n)\}
+\end{equation*}
+Here is an example of MaxPooling:
+
+Fully connected layer is used after several convolutional and pooling layers to perform the classification or regression task on the learned features, which is flattened into a vector. The output of a fully connected layer is fed into a logistic function, softmax or sigmoid, to obtain class probabilities in classification tasks. As neural network, loss function and backpropgation are also used in CNN to optimize the parameters.
+
+
+\section{Evaluation}
+
+
+
+
+
 
 \chapter{Experiments}
 \label{ch:experiment}
@@ -338,521 +541,6 @@ Three additional inclusion criteria are applied when prepare the dataset: 1) pat
 
 
 
-\chapter{Writing style}
-\label{ch:style}
-
-Effective written communication requires both sound content and clear
-style. Keep the layout of your thesis neat and pay attention to your
-writing style.
-
-\section{Using LaTeX}
-
-This document serves as an example, rather than tutorial, since there
-are plenty of those available, see for example 
-\cite{Dummy:1,oetiker14, latex13}. The source files are compiled
-with the command \texttt{pdflatex d\_tyo.tex} (or \texttt{latex
-  d\_tyo.tex}). Depending on your bibliography style, you might also
-need to run \texttt{bibtex d\_tyo}.
-
-Unfortunately, compilation may fail, if your LaTeX environment does
-not have all the needed packages installed. If you cannot install
-them, you can momentarily disable them by putting them inside comments
-in the file tutthesis.cls:
-\begin{center}
-\texttt{\% \textbackslash usepackage\{hyperref\}}
-\end{center}
-Of course, depending on the package, some of the features are also
-disabled and you must remove those parts from your tex file.
-Spellchecking can done, for example, by running 
-\texttt{aspell -t -c d\_tyo.tex}.
-
-Moreover, certain characters need escape symbols, e.g. per cent should
-be written as \textbackslash\% (otherwise it starts a comment),
-underscore as \textbackslash\_, tilde as \textbackslash\~{}\{\}, hash
-as \textbackslash\#, dollar sign as \textbackslash\$, and opening
-brace as \textbackslash\{ and so on. Note that double backslash
-\textbackslash\textbackslash makes a line break.
-
-\section{Text}
-A thesis is written with a single-column layout on one- or two-sided
-A4 sheets (210 mm x 297 mm). The font type of the body text is usually
-Times New Roman and the font size is 12 pt. The spacing is 1.2 and the
-text is fully justified and hyphenated. You do not have to indent the
-paragraphs.
-
-Arial 18 pt font is used for the headings in this guide, and there is
-a 42 pt space above and below. The font size of subheadings is
-14. There is an18 pt space above subheadings and 12 pt space below
-them.
-\\
-Brief basics of writing style are:
-\begin{itemize}
-\item Always think of your reader when you are writing and proceed
-  logically from general to specific.
-\item Highlight your key points, for example, by discussing them in
-  separate chapters or presenting them in a table or figure. Use
-  \textit{italics} or \textbf{boldface} for emphasis, but don't overdo
-  it.  Moreover, this template uses \texttt{teletype} font for LaTeX
-  specific names, such as commands and files.
-\item Avoid long sentences and complicated statements. A full stop is
-  the best way to end a sentence.
-\item Use active verbs to make a dynamic impression but avoid the
-  first person pro-noun ``I'', except in your preface.
-\item Avoid jargon and wordiness. Use established terminology and
-  neutral language.
-\item The minimum length of chapters and subchapters is two
-  paragraphs, and you need to consider the balance of
-  chapters. Paragraphs must always consist of more than one sentence.
-\item Do not use more than three levels of headings, such as 4.4.2.
-\item Do not use too many abbreviations. Use capital and small letter
-  consistently
-\end{itemize}
-
-Sometimes ending a section with list is considered as bad
-style. Therefore, it is better to have some text after it.
-
-
-\section{Figures}
-You must refer to all the figures in the body text. The reference
-should preferably appear on the same page as the actual figure or
-before it. Figures and tables must be numbered consistently thesis
-and primarily placed at the top of the page, but you are free to
-decide where they fit best. Never start a chapter with a figure, table
-or list.
-
-Figures and the caption are either consistently centered (or aligned
-to the left). The caption is placed under the figure and always on the
-same page as the figure. All figures must be explained in the body
-text, so that readers know what they are supposed to notice. Figures
-generated by analysis software usually need further editing, see
-Figure~\ref{fig:ex_fig} for example. The figures should be in the same
-language as other text (even if Figure~\ref{fig:ex_fig} violates this
-recommendation). The recommended font size is the same as that of the
-body text but no smaller than 10 pt. The figures must be readable,
-even if your thesis is printed in greyscale.
-% Note: put tilde between text and ref command, like in
-% 'Figure~\ref{fig:ex_fig}' above. Tilde (~) puts a white space but
-% prevents line break. Same thing applies to Table~\ref{tab:summary}
-% as well.
-
-% Here's an example how to add a figure. Default placement of figures
-% is at top of page, i.e. placement specifier is '[t]' could be
-% omitted.  The dimensions can be relative to text width (or height)
-% or absolute (4 cm).
-
-% You can leave out the figure postfix (.pdf, .eps, .png). Utilized
-% tool (pdflatex, latex...) decides what file type to look for.
-% http://en.wikibooks.org/wiki/LaTeX/Importing_Graphics#Compiling_with_latex
-
-% Note that figure is placed _after_ this point and also after the
-% previous figures. You can cut-paste the figure insertion point
-% earlier to get it in better place, i.e. the figure can be before
-% reference to it in the Tex file, but otherway round in final pdf.
-% More information: [Oetker, pp. 49-52]. 
-\begin{figure}[t]
-  \begin{center}
-    \includegraphics[width=1.0\textwidth]{exampleFig}
-  \end{center}
-  \caption[Diagrams should be edited before publication.]{Diagrams
-    should be edited before publication. The diagram on the right is
-    an edited version of the one on the left.}
-  % Optional shorter caption in brackets is used in Table of Figures
-  % (tof).
-  \label{fig:ex_fig}
-\end{figure}
-
-% In conference and journals articles with two columns, the
-% command \begin{figure*} is useful. The asterisk makes the figure
-% width equal to the whole page. The same applies to \begin{table*} as
-% well.
-
-
-
-The basic command \texttt{latex} accepts only encapsulated postscript
-(eps) format. Therefore it is usually easiest to compile with
-\texttt{pdflatex} which can handle \verb+*.png+, \verb+*.jpg+ and
-\verb+*.pdf+ formats. Eps and pdf are recommended since their support
-vector graphics (zooming). For example Figure~\ref{fig:ex_fig} is in
-pdf format. 
-%Some programs, such as PowerPoint, store pdf figures A4
-%sized. Fortunately, pdf editors, such as PDF-X-Change, have a feature
-%'remove white spaces' or 'crop'.
-
-
-LaTeX has a package \texttt{subfigure} to layout multiple figures
-together, for example Figure~\ref{subfig:draft} to
-\ref{subfig:small_fig}. There might be newer packages as well, but this is
-already a quantum leap ahead of some other, unnamed word processors.
-% See http://www.ctan.org/pkg/subfigure
-\begin{figure*}
-  \begin{center}
-    \subfigure[Option \texttt{draft} helps to makes a placeholder box for figure. The file must exist.]{
-      \includegraphics[draft, width=0.35\textwidth]{exampleFig}
-      \label{subfig:draft}}
-    \qquad                        % i) Ugly hack to get more horizontal space between figures
-    %\hspace{0.05\textwidth}      % ii) Another ugly way to hack space
-    % ~~                          % iii) Yet another... 
-    \subfigure[Another way ot make a placeholder box with the command
-      \texttt{rule}.]{
-      \textcolor{blue}{\rule{0.3\textwidth}{3cm}}
-      \label{subfig:rule}}
-    \subfigure[Actual figure included but scaled down.]{
-      \includegraphics[width=0.35\textwidth]{exampleFig}
-      \label{subfig:small_fig}}
-    \caption[Example of subfigures]{Example of subfigures. Pay attention to how nicely they
-      are laid out and their neat subcaptions.}
-    % Optional shorter caption in brackets is used in Table of Figures
-    % (tof).
-
-    \label{fig:subfigs}
-  \end{center}
-\end{figure*}
-
-
-\section{Tables}
-
-Tables have numbered captions, see Table\ref{tab:thin_film} for
-example. The caption is placed on the same page but above the table,
-unlike the captions that accompany figures. You must refer to all the
-tables in the body text. In addition, you must discuss the content of
-any tables in the body text to ensure that readers understand their
-relevance.
-%
-%TODO: translate the thin film explanation in English
-%
-
-\todo{translate the thin film explanation in English}
-
-\begin{table}[ht]
-  \small
-  \begin{center}
-    \caption{Example of evaporation conditions in a thin film structure.}
-    \label{tab:thin_film}
-    \begin{tabular}{l | r r r r r r}
-      % l = align to left (e.g. text), c=align to center, r=align to
-      % right (e.g. numbers), Pipe | creates vertical line
-      % Let's put 1 horinzontal line above the table, 2 after header rows,  and 1 below
-      \hline
-      \textbf{Substance} & \textbf{Thickness}& \textbf{Correction } & \textbf{Pressure} & \textbf{Temper-}          & \textbf{Current} & \textbf{Speed} \\
-                         & \textbf{(nm)}     & \textbf{coefficient} & \textbf{(mbar)}   & \textbf{ature ($^\circ$C)} & \textbf{(mA)}    & \textbf{(nm/s)} \\
-      \hline 
-      \hline
-      SiO2	& 181.0	& 1.10	& $3.0\cdot10^5$	& 90.6	& 20-23	 &0.2 \\
-      TiO2	& 122.1	& 1.55	& $1.5\cdot10^4$	& 91.1	& 100-93 &0.1 \\
-      \hline
-    \end{tabular}
-  \end{center}
-\end{table}
-
-
-Often it is better to create the table in, e.g. MS Excel, and import
-it as .eps or .pdf file, for example, when you calculate some of the
-values automatically.
-%\begin{table}[h]
-%  \begin{center}
-%    \caption{Example of evaporation conditions in a thin film structure.}
-%    \label{tab:thin_film_graphics}
-%    \includegraphics[width=8cm]{my_table.eps}
-%  \end{center}
-%\end{table}
-
-
-
-The titles of the columns in your table are specified and data is
-added to the table. You can use boldface to highlight the titles and
-use a double horizontal line to separate the from the rest of the
-table. The order of the columns and rows must be carefully
-considered. Do not surround all the cells with a border, as it may
-make your table harder to read. Put a line on top and bottom of the
-table. You can add a horizontal line between every $4-5$ rows, if the
-data is not grouped into categories. If the table is large, the rows
-should be numbered if you plan to refer to the rows in the body text.
-
-The numbers are right aligned (optimally lined up at the decimal
-point) for easy comparison. You should preferably use SI units,
-established prefixes and rewrite large numbers so that the power of
-ten should be placed in the title of the column instead of each row,
-if possible. More suggestions can be found in \cite{salminen09}.
-
-\section{Mathematical notations}
-
-Numbers are generally written using numerals for the sake of clarity,
-for example ``6 stages'' rather than ``six stages'', which is
-nevertheless strongly preferred to ``a couple of stages''. You should
-also use a thousand separators\footnote{Use tilde \~{} in LaTeX and a
-  special character \textit{non-breaking space} in MS Word},
-i.e. instead of 55700125 write 55~700~125. Never omit the leading zero
-in decimals. For example, it is correct to write ``0.5'' and wrong to
-write ``.5''. A comma is used as a decimal separator in the Finnish
-language and a period in the English language.
-
-Like numbers, it is advisable to abbreviate units of
-measurement. There is a space between the number and the unit, but you
-should keep them on the same line. It is better to compile a table or
-graph than include a great deal of numerical values in the body
-text. Use precise language and put numbers on a scale (small, fast,
-expensive).
-
-Use generally known and well defined concepts and standard conventions
-and symbols for representing them. New concepts should be defined when
-they appear in the text for the first time. Upper case and lower case
-letters mean different things in symbols and units of measurement. Do
-not use the same symbol to mean different things.
-
-Newton's Second Law can be presented in the following way:
-
-\begin{equation}
-  \label{eq:newton2}
- ma= F,
-\end{equation}
-
-where $m$ denotes the mass of an object, $a$ means acceleration, and
-$F$ means force. Please note that all the variables must be defined at
-the point of their first appearance. All sen-tences end with a
-punctuation mark, and the main elements of a sentence are separated by
-a comma in accordance with the rules of English grammar.  Mathematical
-formulas are numbered, if they are written on separate lines and
-referred to in the main body of the text. The number is usually put in
-parenthesis and right aligned, see equation \ref{eq:newton2} for
-example. Occasionally mathematical notations are preceded by an
-identifier, such as 'Definition 1' or 'Theorem 1'
-\cite{ruohonen09}. Simple formulas may be displayed within the body of
-the text without numbering.
-
-Do not start a sentence with a mathematical symbol but add some word,
-such as the name or type of the symbol, in front of it. Variables,
-such as x and y, are generally presented in italics, whereas
-elementary functions, special functions and operators are not:
-\begin{center}
-sin$(2x+y)$, 	grad $T$, 	div $B$, 	lim $(x^2 - 1)/(x + 1)$.
-\end{center}
-
-At first, it is better to rely on the automated formatting of an
-equation editor. You may have to make compromises between logical
-clarity and readability.
-
-
-LaTeX is the best editor for writing also the more complex equations, such as
-\begin{equation}
-  \label{eq:fourier}
-  G^+(t,t')= \int G^+(E) exp[-iE(t-t')/\hbar] dE.
-\end{equation}
-
-
-
-
-\section{Programs and algorithms}
-
-Codes and algorithms are written using monospaced font, such as
-Courier New, Consolas or their variations. If the length of the code
-or algorithm is less than 10 lines and you do not refer to it later on
-in the text, you can present it similarly to formulas.  Here's an
-example showing a snippet from the makefile. These commands were
-written directly to the .tex file and appear without numbering.
-
-\begin{lstlisting}[style=console, % title={Template files}
-  ] 
-all: ${TARGET}.tex
-	pdflatex ${TARGET}.tex
-	bibtex ${TARGET}
-	pdflatex ${TARGET}.tex
-\end{lstlisting}  
-% You can add an extra dollar sign here to turn off the accidental
-% syntax highlight (when there is an odd number of dollar signs in
-% listing)
-
-If the code is longer but shorter than a page, you present like a
-figure (Program 4.1) titled ``Program'' or ``Algorithm''.
-% This is controlled from .cls file with command
-% \renewcommand\lstlistingname{Program} % or {Ohjelma} in Finnish
-You should add some comments to the code and indent it
-consistently. The actions performed by the code must be outlined in
-broad terms in the body text. Line numbers make it much easier to
-refer to the code in the text. 
-
-LaTeX has a package listings \cite{heinz06} which can handle code
-very conveniently, include real code files, add row numbers, and
-highlight the reserved words.  Program shows another
-example which is included from a separate file
-\textit{example\_code.c}, and includes both line numbers and a code
-numbering.
-
-\begin{minipage}{\linewidth} % Optional: Minipage prevents a page break in the middle of listing
-% \lstinputlisting[style=a1listing, language=C, emph={koko} 
-%   , numberstyle=\tiny, stepnumber=2, numbersep=5pt
-%   , caption={Example of algorithm. Variable \textit{koko} is emphasized to highlight some important aspect.}
-%   , captionpos=b, nolol=false, label={code:sort}
-% ] {example_code.c}
-\end{minipage}
-
-
-% Alternatively you can add your code also inside the figure
-% environment, but use only style consistently in your thesis.
-%\begin{figure}
-% \lstinputlisting[style=a1listing, language=C,...
-% \caption{Example of algorithm...}
-% \label{code:sort}
-%\end{figure}
-
-
-
-\chapter{Referencing styles}
-\label{sec:ref_styles}
-
-Different referencing styles determine how you create 1) in-text
-citations and 2) the bibliography. Two common referencing styles are
-presented in this chapter:
-\begin{enumerate}
-\item	Numeric referencing (Vancouver system), such as [1],[2]...
-\item	Name-year system (Harvard system), such as (Weber 2001), (Kaunisto 2003)...
-\end{enumerate}
-
-A numeric reference is inserted in square brackets [~], whereasthe last
-name of the author and the year of publication are given in round
-brackets ().
-
-Both styles are acceptable, but the conventions for referencing vary
-between disciplines. You must pick one and use is consistently
-throughout your thesis.
-
-\section{In-text citations}
-
-In-text citations are placed within the body of the text as close to
-the actual citation as possible. The citation is generally placed
-within the sentence before the full stop. LaTeX has a command
-\texttt{\textbackslash cite} for this \cite[p. 85]{oetiker14}. See the
-tex file for additional remarks for Harvard style citations.
-% The package Harvard has also additional commands, such as
-% \citename{heinz06}, \citeyear{heinz06}, \citeasnoun{heinz06} and so
-% on.
-%
-% Similarly the biblatex has a command \parencite{heinz06} to produce
-% '(Heinz 2006)' instead of mere 'Heinz 2006'
-%
-
-
-
-\begin{itemize}
-  \setlength{\itemsep}{-10pt} % Put these lines closer to each other
-  \small
-\item[] Weber argues that [1]. 
-\item[] Cattaneo et al. introduce in their study [2] a new...
-\item[] The result is ... [1, p. 23]. One must also note... [1, s. 33-36]
-\item[]
-\item[] In accordance with the presented theory ... (Weber 2001).
-\item[] It must especially be noted... (Cattaneo et al.).
-\item[] Weber (2001, p. 230) has stated...
-\item[]
-\item[] Based on literature in the field [1,3,5]...
-\item[] Based on literature in the field [1][3][5]...
-\item[] The topic has been widely studied [6-18]...
-\item[]
-\item[] ...existing literature (Weber 2001; Kaunisto 2003; Cattaneo et al. 2004) has...
-\end{itemize}
-
-
-\section{Bibliography}
-The entries must include all the details listed in Table~\ref{tab:bibl}.
-\begin{table}[!ht]
-  \small
-  \begin{center}
-    \caption{Necessary bibliographic information.}
-    \label{tab:bibl}
-    \begin{tabular}{r l | r l }
-\hline 
-\textbf{\#}  
-   & \textbf{Numeric system}
-                       & \textbf{\#}  
-                                & \textbf{Name-year system}\\
-\hline
-\hline
-1. &	authors,	   & 1. & authors,  \\
-   &                       & 2. & (year in parentheses) \\
-2. &	title,             & 3.	& title,    \\
-3. &	publisher,         & 4.	& publisher,\\
-4. &	year of publication, &  &	 \\
-5. &	pages,             & 5.  & pages, \\
-6. &	URL, if applicable & 6.	& URL, if applicable    \\
-      \hline
-    \end{tabular}
-  \end{center}
-\end{table}
-
-
-Formatting examples of an journal article in bibliography are provided
-below, first in the numeric style and then the name-year style.
-
-% Define columns widths to get text wrapped
-\begin{tabular}{p{1cm}p{12cm}}
-\small
-[100] & K. Keutzer, A.R. Newton, J.M. Rabaey,
-A. Sangiovanni-Vincentelli, System-level design: orthogonalization of
-concerns and platform-based design, IEEE Transactions on
-Computer-Aided Design of Integrated Circuits and Systems, vol.19,
-no.12, Dec 2000, pp.1523-1543.\\
-\end{tabular}
-
-\begin{tabular}{p{13cm}}
-\small
-Keutzer, K., Newton, A.R., Rabaey, J.M. \& Sangiovanni-Vincentelli
-A. (2000). System-level design: orthogonalization of concerns and
-platform-based design. IEEE Transactions on Computer-Aided Design of
-Integrated Circuits and Systems. Vol.19(12), s.1523-1543. \\
-\end{tabular}
-
-Your references are listed at the end of your thesis in alphabetical
-order based on the first author's last name. If the author is unknown,
-alphabetize the source using the corporate author or title.
-
-
-LaTeX has two ways for making reference list
-\begin{enumerate}
-\item using automated Bibtex tool
-\item manually
-\end{enumerate}
-
-The tex source of this document has both versions, and the other is in
-comments. Bibtex\footnote{\url{http://ctan.org/pkg/bibtex}} formats the
-reference list according to a setup file, which is usually provided by
-academic journals. You need to write the basic information into
-\texttt{.bib} file. Citations in your tex file at looked up by bibtex
-and it produces the list of references automatically.
-
-\subsection{Header at 3rd level}
-\label{sec:3rd}
-Some text...
-
-\subsection{Another header at 3rd level}
-\label{sec:3rd_partner}
-
-Section~\ref{sec:3rd} cannot appear alone, but needs some company
-(i.e.~\ref{sec:3rd_partner}).
-
-%\subsubsection{Avoid 4th level headers}
-%Luckliy they are not numbered in this LaTeX template
-
-
-% \paragraph{Paragraph}
-% Fifth level header
-% Empty line is a paragraph separator in LaTeX.
-
-
-\chapter{Conclusions}
-\label{ch:concl}
-This template and the mathching Latex document class file together
-with general writing guidelines should help achieving a consistently
-formatted and clear documents. Similar template is also available for
-MS Word.
-
-Every writing and presentation must have a conclusion. This fact is
-here emphasized by having this short and rather artificial summary
-also in this template. A concise summary table is a good way for
-providing an overview of the most important points.
-
-
-%
-% The bibliography, i.e the list of references
-%
 \newpage
 
 \printbibliography[title=References]
