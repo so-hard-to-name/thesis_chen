@@ -7,13 +7,14 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, models
+from tensorflow.keras.utils import plot_model
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 # 1. Read the CSV file
 # data1 = pd.read_csv('imputed_li_modified.csv')
 # data2 = pd.read_csv('data12h.csv')
-data = pd.read_csv('ppca_merged_oneline.csv')
+data = pd.read_csv('li_train_dataset.csv')
 # merged_data = pd.merge(data1, data2, on='stay_id', how='inner')
 # # 2. Sort the data
 # # data = data.sort_values(by=['stay_id', 'hour_num'])
@@ -54,27 +55,27 @@ data = pd.read_csv('ppca_merged_oneline.csv')
 x, y = data.iloc[:, 1:85].values, data['lods'].values
 
 x_reshaped = x.reshape(x.shape[0], 12, 7)
+print(type(x))
 
-X_train, X_test, y_train, y_test = train_test_split(x_reshaped, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(x_reshaped, y, test_size=0.125, random_state=42)
 
 # 5. define the model
 # Assuming a simple CNN architecture
 model = models.Sequential()
 
-# Conv2D layer with 32 filters, kernel size (3, 3), activation 'relu'
-model.add(layers.Conv1D(filters=32, kernel_size=3, activation='relu', input_shape=(12, 7)))
+# Conv1D layer with 32 filters, kernel size 3, activation 'relu'
+model.add(layers.Conv2D(filters=32, kernel_size=(3, 1), padding='same', activation='relu', input_shape=(12, 7, 1)))
 
-# MaxPooling2D layer with pool size (2, 2)
-model.add(layers.MaxPooling1D(pool_size=2))
+model.add(layers.Conv2D(filters=32, kernel_size=(1, 7), padding='same', activation='relu'))
+model.add(layers.MaxPooling2D(pool_size=(2, 2)))
 
-model.add(layers.Conv1D(filters=64, kernel_size=3, activation='relu'))
-model.add(layers.MaxPooling1D(pool_size=2))
+model.add(layers.Conv2D(filters=32, kernel_size=(1, 7), padding='same', activation='relu'))
 
+model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+
+model.add(layers.Conv2D(filters=32, kernel_size=(3, 1), padding='same', activation='relu'))
 # Flatten the output before feeding it to dense layers
 model.add(layers.Flatten())
-
-# Dense layer with 64 units and activation 'relu'
-model.add(layers.Dense(64, activation='relu'))
 
 # Output layer with 1 unit (assuming regression) and linear activation
 model.add(layers.Dense(1, activation='linear'))
@@ -83,4 +84,13 @@ model.add(layers.Dense(1, activation='linear'))
 model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'])
 
 
-model.fit(X_train, y_train, epochs=10, batch_size=32, validation_data=(X_test, y_test))
+model.fit(X_train, y_train, epochs=10, batch_size=64, validation_data=(X_test, y_test))
+
+# plot_model(model, to_file='cnn_model.png', show_shapes=True)
+
+# model_without_layer = models.Sequential()
+# for layer in model.layers[:-2]:  # Remove the last layer
+#     model_without_layer.add(layer)
+
+# # Save the modified model
+# model_without_layer.save("li_cnn_model.keras")
