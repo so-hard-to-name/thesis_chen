@@ -16,19 +16,17 @@ for index, row in dataset.iterrows():
     # Extract ID and data to process from the current row
     row_id = row['stay_id']  # Assuming 'id' is the name of the ID column
     data_to_process = row[1:85].values
-    print(data_to_process)
-    
+        
     # Reshape data_to_process if needed (e.g., for CNN input)
     data_to_process_reshaped = data_to_process.reshape(1, 12, 7, 1)
-    print(data_to_process_reshaped)
 
     data_to_process_reshaped = np.asarray(data_to_process_reshaped).astype('float32')
     
     # Process data using the model
     processed_data = model.predict(data_to_process_reshaped)  # Assuming model expects a 2D input
-    print(processed_data)
-    processed_data = processed_data.reshape(1, )
-
+    
+    processed_data = processed_data.reshape(1, 16)
+    
     # Append the ID and processed data to the list
     processed_row = np.concatenate([[row_id], processed_data.flatten()])
     processed_rows.append(processed_row)

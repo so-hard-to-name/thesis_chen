@@ -54,7 +54,7 @@ data = pd.read_csv('li_train_dataset.csv')
 # all_y = [entry['y'] for entry in data_dict.values()]
 x, y = data.iloc[:, 1:85].values, data['lods'].values
 
-x_reshaped = x.reshape(x.shape[0], 12, 7)
+x_reshaped = x.reshape(x.shape[0], 12, 7, 1)
 print(type(x))
 
 X_train, X_test, y_train, y_test = train_test_split(x_reshaped, y, test_size=0.125, random_state=42)
@@ -78,6 +78,8 @@ model.add(layers.Conv2D(filters=32, kernel_size=(3, 1), padding='same', activati
 model.add(layers.Flatten())
 
 # Output layer with 1 unit (assuming regression) and linear activation
+model.add(layers.Dense(48, activation='relu'))
+model.add(layers.Dense(16, activation='relu'))
 model.add(layers.Dense(1, activation='linear'))
 
 # Compile the model
@@ -86,11 +88,11 @@ model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'])
 
 model.fit(X_train, y_train, epochs=10, batch_size=64, validation_data=(X_test, y_test))
 
-# plot_model(model, to_file='cnn_model.png', show_shapes=True)
+plot_model(model, to_file='cnn_model.png', show_shapes=True)
 
-# model_without_layer = models.Sequential()
-# for layer in model.layers[:-2]:  # Remove the last layer
-#     model_without_layer.add(layer)
+model_without_layer = models.Sequential()
+for layer in model.layers[:-1]:  # Remove the last layer
+    model_without_layer.add(layer)
 
-# # Save the modified model
-# model_without_layer.save("li_cnn_model.keras")
+# Save the modified model
+model_without_layer.save("cnn_model_li.keras")
