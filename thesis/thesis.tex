@@ -526,14 +526,68 @@ Fully connected layer is used after several convolutional and pooling layers to 
 
 
 \section{Evaluation}
+Two measurements are used to evaluate the result, Mean Absolute Error (MAE) and Root Mean Square Error (RMSE). Both are common used metrics to evaluate a regression model.
 
+Mean Absolute Error (MAE) measures the average absolute difference between the predicted values and the actual values, calculated with: 
+\begin{equation*}
+    \mathrm{MAE}=\frac{1}{n} \sum_{i=1}^n\left|y_i-\hat{y}_i\right|
+\end{equation*}
+where $n$ is the amount of observations, $y_i$ represents the actual value for observation $i$, and $\hat{y}_i$ represents the predicted value for observation $i$. MAE is robust to outliers since it considers the absolute differences. It gives equal weight to all errors, regardless of their magnitude
 
+Root Mean Square Error (RMSE) measures the square root of the average of the squared differences between the predicted values and the actual values, calculated with: 
+\begin{equation*}
+    \mathrm{RMSE}=\sqrt{\frac{1}{n} \sum_{i=1}^n\left(y_i-\hat{y}_i\right)^2}
+\end{equation*}
+where $n$ is the amount of observations, $y_i$ represents the actual value for observation $i$, and $\hat{y}_i$ represents the predicted value for observation $i$. RMSE penalizes larger errors more heavily than smaller ones due to the squaring operation. It is sensitive to outliers because of this squaring
 
-
+Both MAE and RMSE are measured in the same units as the dependent variable (the variable being predicted). Lower values of both metrics indicate better model performance. In summary, MAE and RMSE are both useful metrics for evaluating the accuracy of regression models, with MAE being more robust to outliers and RMSE penalizing larger errors more heavily.
 
 
 \chapter{Experiments}
 \label{ch:experiment}
+The aim of experiments are using bed-side data of the first 12 hours which is shorter time-range than LODS to predict the LODS, after first day stay.
+
+Both experiments used MacBook Air 2022, with M2 CPU, 24GB Memory and CPU ...
+
+\section{Experiment I}
+Experiment I uses only 1 value of each measurement in the first 12 hours. 
+
+Based on research from \textcite{asuroglu2021, johnson2013}, and some bed-side data as backup, we first get the maximum, minimum and average measurements of heart rate, respiratory rate, Systolic blood pressure(sbp), Diastolic blood pressure (dbp), mean arterial pressure (MAP), Oxygen Saturation (SPO2), temperature, glucose in the first 12 hours of ICU stay, the worst value of GCS, GCS eye, GCS motor, GCS verbal, GCS unable, the total urine output in the first 12 hours, and the most mechanical ventilation method in the first 12 hours which is ordered in Tracheostomy, Invasive Ventilation, Non Invasive Ventilation, High-flow nasal cannula (HFNC), Supplemental Oxygen and others. When collecting data, ventilation methods are coded with 1 to 6 based on the mechanical level. Moreover, patients' age and gender are also collected, where gender are coded with 0 for Male and 1 for Female.  These 33 measurements are used as input and the target is LODS value. 
+
+There are in total 8834 records. 
+
+\subsection{Feature Engineering}
+After reviewing the data, some patients have bad maximum and minimum vital sign, but good average vital sign. The average values can not show the real situation of patient. So the average values are discarded.
+
+To reduce the amount of features, the worst value are collected for the vital signs, as the rules in LODS and OASIS. However, to decide the worst value, a baseline value for each vital sign is used that the absolute difference between minimum/maximum value and baseline value is calculated. The one with larger absolute difference is the worst value. 
+
+For an adult, the normal value of each vital sign is a range. Then the baseline we use the median of the range that based on  we take baseline as table  ...
+\begin{table}[]
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Measurements} & \textbf{Baseline Value}\\ \hline
+heart rate            & 80                \\ \hline
+sbp                   & 120               \\ \hline
+dbp                   & 80                \\ \hline
+map                   & 100               \\ \hline
+resp rate             & 14                \\ \hline
+temperature           & 16                \\ \hline
+spo2                  & 98                \\ \hline
+glucose               & 85                \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Experiment}
+
+All records are divided by 7:1:2 that 70\% for training, 10\% for validation and 20\% for test. 
+
+After performing a feature engineering, it is proved that glucose value has no effect in predict result, so glucose is removed as well.
+
+Applying the two correlation coefficient to check and got a result as table ...
+
+
+\section{Experiment II}
+
 
 \chapter{Results}
 \chapter{Conclusion}
