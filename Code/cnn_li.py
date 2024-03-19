@@ -78,7 +78,7 @@ model.add(layers.Conv2D(filters=32, kernel_size=(3, 1), padding='same', activati
 model.add(layers.Flatten())
 
 # Output layer with 1 unit (assuming regression) and linear activation
-model.add(layers.Dense(48, activation='relu'))
+model.add(layers.Dense(32, activation='relu'))
 model.add(layers.Dense(16, activation='relu'))
 model.add(layers.Dense(1, activation='linear'))
 
@@ -86,7 +86,7 @@ model.add(layers.Dense(1, activation='linear'))
 model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'])
 
 
-model.fit(X_train, y_train, epochs=10, batch_size=64, validation_data=(X_test, y_test))
+model.fit(X_train, y_train, epochs=10, batch_size=48, validation_data=(X_test, y_test))
 
 plot_model(model, to_file='cnn_model.png', show_shapes=True)
 
