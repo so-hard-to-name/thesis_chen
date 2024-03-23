@@ -11,7 +11,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
 
 # Load your dataset into a pandas DataFrame
-data = pd.read_csv('data12h.csv')
+data = pd.read_csv('data12h_train_dataset.csv')
 
 data['sex'] = np.where(data['gender'] == "M", 0, 1)
 data['heart_rate'] = np.where(abs(data['heart_rate_min'] - 80) >= abs(data['heart_rate_max'] - 80), data['heart_rate_min'], data['heart_rate_max'])
@@ -36,15 +36,15 @@ for feature in features.columns:
 correlations.sort(key=lambda x: x[1], reverse=True)
 
 # Print Spearman correlation coefficients
-print("Spearman Correlation Coefficients:")
-for feature, corr in correlations:
-    print(f"{feature}\t\t{corr:.8f}")
+# print("Spearman Correlation Coefficients:")
+# for feature, corr in correlations:
+#     print(f"{feature}\t\t{corr:.8f}")
 
 # Extract the feature names in the ranked order
 ranked_features = [feat for feat, _ in correlations]
 
 # Select the top features for training
-top_features = ranked_features[:14]  # Adjust the number of top features as needed
+top_features = ranked_features[:11]  # Adjust the number of top features as needed
 
 # Subset the data with the top features
 X_selected = features[top_features]
@@ -80,22 +80,24 @@ print('Root Mean Squared Error:', rmse)
 mae = mean_absolute_error(y_test, y_pred)
 print('Mean Absolute Error:', mae)
 
+xgb_model.save_model('xgb_model_spearman.model')
+
     # Predicted vs Actural
 # plt.scatter(y_pred, y_test)
 
-heatmap, xedges, yedges = np.histogram2d(y_test, y_pred, bins=10)
+# heatmap, xedges, yedges = np.histogram2d(y_test, y_pred, bins=10)
 
-# Normalize the heatmap values to the range [0, 1]
-heatmap = heatmap.T / np.max(heatmap)
+# # Normalize the heatmap values to the range [0, 1]
+# heatmap = heatmap.T / np.max(heatmap)
 
-# Plot the actual vs predicted values with transparency based on point density
-plt.scatter(y_test, y_pred, alpha=heatmap.flatten())
+# # Plot the actual vs predicted values with transparency based on point density
+# plt.scatter(y_test, y_pred, alpha=heatmap.flatten())
 
-# Add a diagonal line representing perfect prediction
-plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='black', linestyle='--')
+# # Add a diagonal line representing perfect prediction
+# plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='black', linestyle='--')
 
 
-plt.xlabel('Actual Values')
-plt.ylabel('Predicted Values')
-plt.title('Predicted vs. Actual Plot')
-plt.show()
+# plt.xlabel('Actual Values')
+# plt.ylabel('Predicted Values')
+# plt.title('Predicted vs. Actual Plot')
+# plt.show()

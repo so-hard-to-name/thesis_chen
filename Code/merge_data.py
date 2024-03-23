@@ -21,7 +21,7 @@
 import pandas as pd
 
 # Load CSV files
-csv1 = pd.read_csv('ppca_oneline.csv')
+csv1 = pd.read_csv('cnn_processed_data_ppca.csv')
 csv2 = pd.read_csv('data12h.csv')
 
 # Select only the relevant columns from csv1
@@ -35,7 +35,7 @@ merged_data = pd.merge(csv1, csv2, on='stay_id', how='inner')
 # Optionally, you can sort the data by 'stay_id' and 'num' within each group
 # merged_data.sort_values(by=['stay_id', 'hour_num'], inplace=True)
 
-merged_data.to_csv('ppca_merged_online.csv', index=False)
+merged_data.to_csv('cnn_processed_data_ppca_merged.csv', index=False)
 # Assuming merged_data is already defined
 
 # Get unique stay_ids

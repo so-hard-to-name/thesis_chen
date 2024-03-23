@@ -14,7 +14,7 @@ from sklearn.preprocessing import StandardScaler
 # 1. Read the CSV file
 # data1 = pd.read_csv('imputed_li_modified.csv')
 # data2 = pd.read_csv('data12h.csv')
-data = pd.read_csv('li_train_dataset.csv')
+data = pd.read_csv('ppca_train_dataset.csv')
 # merged_data = pd.merge(data1, data2, on='stay_id', how='inner')
 # # 2. Sort the data
 # # data = data.sort_values(by=['stay_id', 'hour_num'])
@@ -64,7 +64,7 @@ X_train, X_test, y_train, y_test = train_test_split(x_reshaped, y, test_size=0.1
 model = models.Sequential()
 
 # Conv1D layer with 32 filters, kernel size 3, activation 'relu'
-model.add(layers.Conv2D(filters=32, kernel_size=(3, 1), padding='same', activation='relu', input_shape=(12, 7, 1)))
+model.add(layers.Conv2D(filters=32, kernel_size=(4, 1), padding='same', activation='relu', input_shape=(12, 7, 1)))
 
 model.add(layers.Conv2D(filters=32, kernel_size=(1, 7), padding='same', activation='relu'))
 model.add(layers.MaxPooling2D(pool_size=(2, 2)))
@@ -73,13 +73,13 @@ model.add(layers.Conv2D(filters=32, kernel_size=(1, 7), padding='same', activati
 
 model.add(layers.MaxPooling2D(pool_size=(2, 2)))
 
-model.add(layers.Conv2D(filters=32, kernel_size=(3, 1), padding='same', activation='relu'))
+model.add(layers.Conv2D(filters=32, kernel_size=(4, 1), padding='same', activation='relu'))
 # Flatten the output before feeding it to dense layers
 model.add(layers.Flatten())
 
 # Output layer with 1 unit (assuming regression) and linear activation
-model.add(layers.Dense(32, activation='relu'))
-model.add(layers.Dense(16, activation='relu'))
+model.add(layers.Dense(48, activation='relu'))
+model.add(layers.Dense(24, activation='relu'))
 model.add(layers.Dense(1, activation='linear'))
 
 # Compile the model
@@ -88,11 +88,11 @@ model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'])
 
 model.fit(X_train, y_train, epochs=10, batch_size=48, validation_data=(X_test, y_test))
 
-plot_model(model, to_file='cnn_model.png', show_shapes=True)
+plot_model(model, to_file='cnn_model_ppca.png', show_shapes=True)
 
 model_without_layer = models.Sequential()
 for layer in model.layers[:-1]:  # Remove the last layer
     model_without_layer.add(layer)
 
 # Save the modified model
-model_without_layer.save("cnn_model_li.keras")
+model_without_layer.save("cnn_model_ppca.keras")

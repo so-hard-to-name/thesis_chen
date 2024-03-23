@@ -11,20 +11,19 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
 
 # Read the CSV file into a DataFrame
-data = pd.read_csv('data12h.csv')
+data = pd.read_csv('cnn_processed_data_ppca_merged.csv')
 
-data['sex'] = np.where(data['gender'] == "M", 0, 1)
-data['heart_rate'] = np.where(abs(data['heart_rate_min'] - 80) >= abs(data['heart_rate_max'] - 80), data['heart_rate_min'], data['heart_rate_max'])
-data['sbp'] = np.where(abs(data['sbp_min'] - 120) >= abs(data['sbp_max'] - 120), data['sbp_min'], data['sbp_max'])
-data['dbp'] = np.where(abs(data['dbp_min'] - 80) >= abs(data['dbp_max'] - 80), data['dbp_min'], data['dbp_max'])
-data['mbp'] = np.where(abs(data['mbp_min'] - 100) >= abs(data['mbp_max'] - 100), data['mbp_min'], data['mbp_max'])
-data['resp_rate'] = np.where(abs(data['resp_rate_min'] - 14) >= abs(data['resp_rate_max'] - 14), data['resp_rate_min'], data['resp_rate_max'])
-data['temperature'] = np.where(abs(data['temperature_min'] - 36) >= abs(data['temperature_max'] - 36), data['temperature_min'], data['temperature_max'])
-data['spo2'] = np.where(abs(data['spo2_min'] - 98) >= abs(data['spo2_max'] - 98), data['spo2_min'], data['spo2_max'])
+# data['sex'] = np.where(data['gender'] == "M", 0, 1)
+# data['heart_rate'] = np.where(abs(data['heart_rate_min'] - 80) >= abs(data['heart_rate_max'] - 80), data['heart_rate_min'], data['heart_rate_max'])
+# data['sbp'] = np.where(abs(data['sbp_min'] - 120) >= abs(data['sbp_max'] - 120), data['sbp_min'], data['sbp_max'])
+# data['dbp'] = np.where(abs(data['dbp_min'] - 80) >= abs(data['dbp_max'] - 80), data['dbp_min'], data['dbp_max'])
+# data['mbp'] = np.where(abs(data['mbp_min'] - 100) >= abs(data['mbp_max'] - 100), data['mbp_min'], data['mbp_max'])
+# data['resp_rate'] = np.where(abs(data['resp_rate_min'] - 14) >= abs(data['resp_rate_max'] - 14), data['resp_rate_min'], data['resp_rate_max'])
+# data['temperature'] = np.where(abs(data['temperature_min'] - 36) >= abs(data['temperature_max'] - 36), data['temperature_min'], data['temperature_max'])
+# data['spo2'] = np.where(abs(data['spo2_min'] - 98) >= abs(data['spo2_max'] - 98), data['spo2_min'], data['spo2_max'])
 
 # Select the features and target variable
-# features = data[['age','heart_rate_min', 'heart_rate_max', 'sbp_min', 'sbp_max', 'dbp_min', 'dbp_max', 'mbp_min', 'mbp_max', 'resp_rate_min', 'resp_rate_max' , 'temperature_min', 'temperature_max', 'spo2_min', 'spo2_max', 'urineoutput', 'gcs_value', 'gcs_motor', 'gcs_eyes', 'ventilation_code']]
-features = data[['sex','age','heart_rate', 'sbp', 'dbp', 'mbp', 'resp_rate' , 'temperature', 'spo2', 'urineoutput', 'gcs_value', 'gcs_motor', 'ventilation_code']]
+features = data[['feature_0', 'feature_1', 'feature_2', 'feature_3', 'feature_7', 'feature_8', 'feature_10','feature_14','feature_15', 'feature_18', 'feature_20', 'feature_21', 'feature_23', 'urineoutput', 'gcs_value', 'gcs_eyes','gcs_motor', 'ventilation_code']]
 target = data['lods']
 
     # Pearson Correlation
@@ -49,13 +48,13 @@ for feature, correlation in correlations:
 ranked_features = [feat for feat, _ in correlations]
 
 # Select the top features for training
-top_features = ranked_features[:8]  # Adjust the number of top features as needed
+top_features = ranked_features[:17]  # Adjust the number of top features as needed
 
 # Subset the data with the top features
 X_selected = features[top_features]
 
 # Split the data into training and test sets
-X_train, X_test, y_train, y_test = train_test_split(X_selected, target, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X_selected, target, test_size=0.125, random_state=42)
 
 # Create the XGBoost model
 xgb_model = xgb.XGBRegressor(n_estimators=100, max_depth=3)
@@ -63,19 +62,19 @@ xgb_model = xgb.XGBRegressor(n_estimators=100, max_depth=3)
 # Train the model
 xgb_model.fit(X_train, y_train)
 
-k = 10
-cv = KFold(n_splits=k, shuffle=True, random_state=42)
+# k = 10
+# cv = KFold(n_splits=k, shuffle=True, random_state=42)
 
-# Perform cross-validation
-mae_scores = -cross_val_score(xgb_model, X_selected, target, cv=cv, scoring='neg_mean_absolute_error')
-rmse_scores = -cross_val_score(xgb_model, X_selected, target, cv=cv, scoring='neg_root_mean_squared_error')
+# # Perform cross-validation
+# mae_scores = -cross_val_score(xgb_model, X_selected, target, cv=cv, scoring='neg_mean_absolute_error')
+# rmse_scores = -cross_val_score(xgb_model, X_selected, target, cv=cv, scoring='neg_root_mean_squared_error')
 
 # Print the cross-validation scores
-print("Cross-Validation MAE scores:", mae_scores)
-print("Average MAE:", mae_scores.mean())
+# print("Cross-Validation MAE scores:", mae_scores)
+# print("Average MAE:", mae_scores.mean())
 
-print("Cross-Validation RMSE scores:", rmse_scores)
-print("Average RMSE:", rmse_scores.mean())
+# print("Cross-Validation RMSE scores:", rmse_scores)
+# print("Average RMSE:", rmse_scores.mean())
 
 
 # Make predictions on the test set
@@ -86,36 +85,6 @@ rmse = mean_squared_error(y_test, y_pred, squared=False)
 print('Root Mean Squared Error:', rmse)
 mae = mean_absolute_error(y_test, y_pred)
 print('Mean Absolute Error:', mae)
-
-# xgb_model.save_model('xgb_model_pearson.model')
-
-bins = np.arange(0, 23, 1)
-
-# Initialize lists to store the mode of y values for each bin
-mode_y_values = []
-
-# Loop through each bin
-for i in range(len(bins) - 1):
-    # Filter y values within the current bin
-    y_in_bin = [y for x, y in zip(y_test, y_pred) if bins[i] <= x < bins[i + 1]]
-    # Find the mode of y values in the bin
-    if y_in_bin:
-        mode_y = max(set(y_in_bin), key=y_in_bin.count)
-        mode_y_values.append(mode_y)
-    else:
-        mode_y_values.append(None)  # No data in the bin, mark as None
-
-# Plot the line representing the mode of y values for each bin
-plt.plot(np.arange(0, 22, 1), mode_y_values, marker='o', linestyle='-')
-plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='black', linestyle='--')
-
-# Add labels and title
-plt.xlabel('X-axis')
-plt.ylabel('Y-axis')
-plt.title('Line representing the mode of y values for each bin')
-
-# Display the plot
-plt.show()
 
     # Predicted vs Actural
 # plt.scatter(y_pred, y_test)
