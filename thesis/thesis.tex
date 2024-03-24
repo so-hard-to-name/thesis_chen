@@ -35,6 +35,8 @@
 % Put your thesis' main language last
 % http://mirrors.ctan.org/macros/latex/required/babel/base/babel.pdf
 \usepackage{lastpage}
+\usepackage{comment}
+\usepackage{multirow}
 \usepackage[english]{babel}
 \usepackage[
 backend=biber,
@@ -151,10 +153,7 @@ April 2019
 % ---------------------------------------
 
 \noindent Intensive Care Unit (ICU) is a high-stakes environment in hospital, where patients are in higher danger than other departments, for instance organ dysfunction, and monitored with devices and more care worker. Effectively predicting patient status in an ICU is a critical task serving patient health and resource allocation Logistic Organ Dysfunction Scale (LODS), with weighted variables with the worst values in first 24h, is an organ dysfunction score system which reflects severity level within an organ system and among organ systems. It is considered as an outcome risk prediction scoring system as well, since an equation is included that converts LODS into probability of mortality. It is confirmed to be usable for the first 7 days in ICU, and is widely used in other departments as well. LODS calculation needs some laboratory results, such as bilirubin, which cost time and money. Effective prediction of LODS value could measure patient overall organ dysfunction situation and calculate probability of mortality for patient.
-
-\noindent Large amount data from ICU, why machine learning? 
-
-\noindent There are a little researches predict LODS with both laboratory result and bedside data. This thesis is to propose a machine learning model, trained with the Medical Information Mart for Intensive Care (MIMIC) -IV database, to predict LODS with data that can be acquired from bedside in first 12 hours of ICU stay, to save time and assist doctor in treatment.
+\noindent There are a little researches predict LODS with both laboratory result and bedside data. This thesis is to propose machine learning models, trained with XGBoost and Convolutional Neural Network, whose training dataset is the Medical Information Mart for Intensive Care (MIMIC) -IV database, to predict total LODS with data that can be acquired from bedside in first 12 hours of ICU stay, to save time and assist doctor in treatment. 
 
 
 
@@ -214,20 +213,23 @@ Machine learning is a branch of artificial intelligence, broadly defined as the 
 
 Medical score system needs accuracy to reflect patients’ condition, and ease of use to reduce clinician time in using and learning. Only if a score system is substantially better than another one, proved by a large number of research, it will be used in practice. So improving an existed score system is more feasible than replacing, and change should be small but useful. LODS esitmates with the worst value of the first 24 hours of ICU stay, both bedside and laboratory measurements, which cost money and time. This research would use only bedside data because they are easy to access, without long-time waiting or money cost. And for some dangerous patients, 24 hours is a long time to collect data. If 24h severity can be predicted early, doctors will be able to change the treatment. LODS is a hybrid scoring system which makes it a good tool in this prediction. As human physiology comprises a complex system, using mathematical models to analyse organ dysfunction may describe systemic host response to infection or injury. \parencite{seely2011} So in this research, machine learning is brought to bedside to predict patients' severity by predicting LODS. ICU has many monitoring devices and produces a large amount lab test results which is a great resource for machine learning model training and research.
 
+XGBoost algorithm is used for predicting part in this study, supported by \textcite{xgboost_lib}. Convolutional Neural Network is used for feature engineering in some models, supported by TensorFlow library. Some vitals signs, include heart rate, respiratory rate, Systolic blood pressure(sbp), Diastolic blood pressure (dbp), mean arterial pressure (MAP), Oxygen Saturation (SPO2), and temperature in the first 12 hours of ICU stay, and other bed side data, include GCS, GCS eye, GCS motor,the total urine output in the first 12 hours, and the most mechanical ventilation method are taken as input to the models, and output is the total LODS value in the first 24h ICU stay. The target is to check if predicting total LODS value to represent patient's 24h situation with 12h bed side data is possible and practicable.
+
+This document is structured as follow. Chapter ~\ref{ch:background} shows the basic organ dysfunction scoring system and machine learning concept. Chapter ~\ref{ch:priorwork} shows some prior related research, mostly about predicting and evaluating patients' situation with bed side data. Chapter ~\ref{ch:methods} introduces the data source and the algorithms used in this study. Chapter ~\ref{ch:experiment} shows the experiments' details and results, and chapter ~\ref{ch:conclusion} discusses the result and shortcomings of this study and some further research direction.
 
 
 \chapter{Background}
 \label{ch:background}
+This chapter aims to show the concept of severity scoring system in critical care and introduce the scoring system, Logistic Organ Dysfunction Score, used in this study. The concept of machine learning is also introduced in this chapter to give a brief idea about machine learning.
 
-
-\section{Severity Scoring systems}
-In critical care, physiology-based scoring systems applied much more than diagnosed-based scoring systems, because sometimes no diagnoses are made on admission and patients in ICU can have more than one organ failure where diagnose-based scoring system is inapplicable. \parencite{Bouch2008} Severity scores are divided into those calculated with data obtained in the first day of ICU admission (for example, the mortality prediction model (MPM)), and those calculated with data collected sequentially throughout the duration of ICU stays (for example, the Sequential Organ Function Assessment (SOFA)). 
+\section{Severity Scoring systems in Critical Care}
+ICU is one of the most dangerous department in a hospital, where patients situation varies but in serious condition. In critical care, physiology-based scoring systems applied much more than diagnosed-based scoring systems, because sometimes no diagnoses are made on admission and patients in ICU can have more than one organ failure where diagnose-based scoring system is inapplicable. \parencite{Bouch2008} Severity scores are divided into those calculated with data obtained in the first day of ICU admission (for example, the mortality prediction model (MPM)), and those calculated with data collected sequentially throughout the duration of ICU stays (for example, the Sequential Organ Function Assessment (SOFA)). 
 
 Both first day and sequential systems can be divided into subjective scores and objective scores. Subjective scores are established by taking variables and applying weights on them based on personal experience of a panel of experts. A range of normality is defined for each variable. The higher weights are assigned to more abnormal results, mostly from 0 to 4. The final score is the total number of points. For instance, Sequential Organ Failure Assesssment (SOFA). Objective scores are developed from a large database of clinical data which is compiled from many ICUs. A multipurpose probability model will be applied to determine ranges, assign weights, and select variables. Variables can be classified into four groups: age, comorbidities, physiological abnormalities, and acute diagnoses. Outcome of these systems are on vital status at hospital discharge predominantly and other measures (for example, life among long-term survivors and vital status 28 days after hospital discharge or quality). All systems result in a logistic regression model to estimate or assist in estimating the risk of death. \parencite{LeGall2005, Bouch2008} 
 
 The principle use of severity scoring systems is to predict and evaluate individual patient's situation. Outcome prediction scores and organ dysfunction are two main categories of severity scoring system, which are respectively used to objectively predict risk of death and assess organ dysfunction. Outcome prediction score was originally developed to provide an indication of the risk of death of groups of ICU patients. However, with the development of medical data and practice, include patient demographics, disease prevalence, and intensive care practice, and statistical and computational techniques, the updated versions of those scores can be applied to individual patient. For instance, the four versions of Acute Physiology and Chronic Health Evaluation (APACHE)  are widely used in ICUs worldwide. Organ dysfunction scores are primarily designed to describe the degree of organ dysfunction. The severity of organ dysfunction varies from one individual patient to another and over time for one individual. Organ dysfunction should take both time and severity into account. There is not a score that covers all organ systems. Moreover, for all organ systems that one score covers, accuracy might varies. \parencite{LeGall2005, Bouch2008, Vincent2010} Severity score systems give assistance in clinical decisions by its objectivity, although they are not always accurate. It's prudent to use severity systems in decision-making, instead of only subjective opinion. But according to \textcite{LeGall2005, Vincent2010-at}, severity scores should not be used to dictate individual patient decisions. In addition, severity scores are also used in clinical trial (for example, evaluating how organ dysfunction affects sepsis morbidity), and evaluation of ICU performance (for example, comparing the probabilities of hospital mortality and actual outcome in ICUs in several countries). \parencite{LeGall2005, Vincent2010}
 
-This research focus on Logistic Organ Dysfunction Score, an organ dysfunction score which is originally designed for first-day use in ICU.
+This research focus on Logistic Organ Dysfunction Score, an organ dysfunction score which is originally designed for first-day use in ICU. When compare with other scores, it can also be used to calculate probability of mortality with an equation, and it has simple calculation. It is a score that can be used for two purposes. So predicting LODS can be considered as predicting organ dysfunction situation and probability of mortality together. 
 
 \subsection{Logistic Organ Dysfunction Score}
 Logistic Organ Dysfunction Score, acronym as LODS, is initially proposed by \textcite{legall96}. The initial goal was to propose an objective system that can reflect  patient severity adequately, and as simple as possible to apply.  In many scoring systems, each organ system is graded from 1 to 4 or from 1 to 6, which are different from the ranges found using statistical methods. Moreover, all organ systems are weighing in the same way does not take the differential prognostic significance of the involved organs into account. 
@@ -288,10 +290,6 @@ LODS was originally developed for the first 24 hours of ICU stay, but it is also
 Machine learning is usually divided into three types, 1) supervised training whose goal is to learn mapping from inputs to outputs, 2) unsupervised training whose goal is to find "interesting pattern" in the input data, 3) and reinforcement learning which is useful in learning how to give reward and punishment. In this thesis, we will focus on supervised training. Two most common categories of supervised training are classification and regression. Classification is widely used when outputs are categorical, such as Male and Female. Labels and outputs in regression are finitely discrete and continuous, respectively, such as the age a viewer of a video in YouTube. In this thesis, we focus on mapping measurements of patients’ situation to the LODS value. Typically, the measurements are referred to as features, while the LODS are referred to the target variable. Besides algorithm and model, training process also needs a notion called loss. In most cases, the machine learning tries to minimise the loss between expectation and real target in the training dataset. However, the objective of a model is not performing well in the training set, but in the unseen data. Generally, to archive this target, a three-way split is performed on the dataset, training set, validation set and test set. The goal is to maximise the performance of model in the test set. The main use of validation set is to choose the hyperparameters of the model, which are not optimized by the learning algorithm. Regularisation parameter is an important class of hyperparamenter to control under-fitting and over-fitting on training set. Under-fitting refers to that model learns too crude between predictors and targets, while overfitting refers to learning too complex. Both situation can be diagnosed by comparing training error and validation error. Underfitting is associated with high error in both training and validation, while overfitting is associated with low error in training but high error in validation. Both situation will cause high error in test set which is called generalisation error. Regularisation aims to balance the underfitting and over fitting. Bias and variance are widely checked in regression. Bias checks if the parameters entered the true parameters, and variance checks the spread level of the parameters. Both are inevitable, so the target is to balance the bias and variance to get an optimal model.
 Another way to choose hyper parameter is to perform cross validation. A common form of cross validation is K-fold validation. Instead of a single training and validation set, K folds training and validation sets are formed by partitioning the available dataset. Each set is used as validation set at a time and others are used as training set. At the end, the averaged validation error is obtained to monitor the training performance. 
 
-\subsection{Bias and Variance}
-\subsection{Under-fitting and Over-fitting}
-\subsection{Neural Network}
-
 
 
 \chapter{Prior Work}
@@ -319,7 +317,9 @@ In this thesis, measurements of  twelve different vital signs were collected fir
 
 Three additional inclusion criteria are applied when prepare the dataset: 1) patients are aged over 18, 2) patients stayed in ICU for more than 24 hours so that there is LODS value calculated, 3) for each vital sign, there are at least one measured value in the first 12 hours. As a result, there are 8034 records included in this study.
 
-\section{Correlation Coefficient}
+\section{Feature Reduction}
+When training a machine learning model, there are commonly too much features collected in dataset. However, not all of them are needed. Only those features with higher correlation with target would be used in training. Correlation coefficient is used to evaluate the correlation between two features or one feature and target. The features with low correlation with target will commonly be dropped off. And if two features has high correlation, one of them would be dropped off when training a model. 
+
 Correlation coefficient is a statistical measure that expresses the linear relationship and direction of two variables, meaning that they can move together at a constant rate. It ranges from -1 to 1, where 0 means no correlation. The coefficient larger than 0 is positive correlation and lower than 0 is negative correlation. The large correlation is indicated with large absolute value of correlation coefficient. Here we will introduce two correlation coefficient
 
 \subsection{Pearson Correlation}
@@ -471,7 +471,7 @@ and the corresponding optimal value is calculated by
 
 
 \subsection{Convolutional Neural Networks}
-All the aforementioned models have a simple two-layer architecture of the form input directly to output. However, there is a subset of machine learning, called deep learning, that uses multi-layer neural network to mimic the complex decision-making process of human brain. Neural networks make up the backbone of deep learning. Here we will start from neural network, according to \textcite{veena2024, stanford_cnn}. 
+All the aforementioned models have a simple two-layer architecture of the form input directly to output. However, there is a subset of machine learning, called deep learning, that uses multi-layer neural network to mimic the complex decision-making process of human brain. Neural networks make up the backbone of deep learning. Here we will start from neural network, according to \textcite{veena2024, stanford_cnn, xinyu2019}. 
 
 Inspired by the structure and function of the brain, a neural network is a computational model that consists of  interconnected nodes or neurons, which are mathematical functions that perform a computation based on inputs and produce an output, in a layered structure. The layers between input and output layers are referred as hidden layers. Neurons inside each layer are not connected, but connected with neurons in subsequent layer through weighted connections. Each connection has an associated weight that determines the strength of the connection. The first step to start a basic feedforward neural network is initialization, where the weights $W$ are initialized randomly and bias $b$ are initialized to zeros. The second step is forward propagation, which passes the input data through each layer of the network, performs computations and produce an output. After data is inputted, the weighted sum of inputs for each neuron is computed in the hidden layers and output layer with
 \begin{equation*}
@@ -532,66 +532,252 @@ Mean Absolute Error (MAE) measures the average absolute difference between the p
 \begin{equation*}
     \mathrm{MAE}=\frac{1}{n} \sum_{i=1}^n\left|y_i-\hat{y}_i\right|
 \end{equation*}
-where $n$ is the amount of observations, $y_i$ represents the actual value for observation $i$, and $\hat{y}_i$ represents the predicted value for observation $i$. MAE is robust to outliers since it considers the absolute differences. It gives equal weight to all errors, regardless of their magnitude
+where $n$ is the amount of observations, $y_i$ represents the actual value for observation $i$, and $\hat{y}_i$ represents the predicted value for observation $i$. MAE is robust to outliers since it considers the absolute differences. It gives equal weight to all errors, regardless of their magnitude. A low MAE indicates the absolute errors between actual values and predicted values are small, and as higher accuracy. It suggests that the model's predictions are close to the actual values, without direction of the errors. On the other hand, a high MAE indicates a poorer performance with higher prediction errors.
 
 Root Mean Square Error (RMSE) measures the square root of the average of the squared differences between the predicted values and the actual values, calculated with: 
 \begin{equation*}
     \mathrm{RMSE}=\sqrt{\frac{1}{n} \sum_{i=1}^n\left(y_i-\hat{y}_i\right)^2}
 \end{equation*}
-where $n$ is the amount of observations, $y_i$ represents the actual value for observation $i$, and $\hat{y}_i$ represents the predicted value for observation $i$. RMSE penalizes larger errors more heavily than smaller ones due to the squaring operation. It is sensitive to outliers because of this squaring
+where $n$ is the amount of observations, $y_i$ represents the actual value for observation $i$, and $\hat{y}_i$ represents the predicted value for observation $i$. RMSE penalizes larger errors more heavily than smaller ones due to the squaring operation. It is sensitive to outliers because of this squaring. A low RMSE indicates the average magnitude of errors between predicted values and actual values is small, which means that the model's predictions are generally close to the actual values, as a good performance. On the other hand, a high RMSE indicates poorer performance. There is also another measurement used in this study, Mean Square Error (MSE), which is squared RMSE. It has same properties as RMSE but emphasizes larger errors due to the squaring operation.
 
-Both MAE and RMSE are measured in the same units as the dependent variable (the variable being predicted). Lower values of both metrics indicate better model performance. In summary, MAE and RMSE are both useful metrics for evaluating the accuracy of regression models, with MAE being more robust to outliers and RMSE penalizing larger errors more heavily.
+Both MAE and RMSE are measured in the same units as the dependent variable (the variable being predicted). Lower values of both metrics indicate better model performance. MAE and RMSE are both useful metrics for evaluating the accuracy of regression models, with MAE being more robust to outliers and RMSE penalizing larger errors more heavily.
 
 
 \chapter{Experiments}
 \label{ch:experiment}
-The aim of experiments are using bed-side data of the first 12 hours which is shorter time-range than LODS to predict the LODS, after first day stay.
+Computational experiments are needed to address the research questions of machine learning. Here, the goal is to specify the experiments, how they are carried out and the result. Two experiments will be introduced here, whose data preparation, feature engineering and executing will be discussed.
 
-Both experiments used MacBook Air 2022, with M2 CPU, 24GB Memory and CPU ...
+Two experiments were executed in this study. The aim of experiments are using bed-side data of the first 12 hours which is shorter time-range than LODS to predict the LODS, after first day stay. Experiment I uses only one value of each feature in the first 12 hours to train an model with XGBoost algorithm to finish the prediction. There is feature reduction process in the experiment whose target is to get a high performance model with small amount of features. The performance is measured with RMSE and MAE.
+Experiment II uses vital sign data of each hour in the first 12 hours and several other bed-side data in the first 12 hours to predict LODS. It runs feature engineering with model trained with CNN algorithm and predicting result with a model trained by XGBoost algorithm. So in this experiment, there are two model training processes and an adjusting process which combines two models together to get a good performance. Same as experiment I, RMSE and MAE are used in this experiment as well to evaluate the performance.
+
+
+After applying the inclusion criteria, there are 8034 records are used in the experiments. The amount of records of each LODS value can be found in Figure~\ref{fig:lods_distri_fig}
+%\ref{table:records_amount_per_lod} 
+
+\begin{figure}[t]
+  \begin{center}
+    \includegraphics[width=1.0\textwidth]{thesis/img/lods_record_distribution.pdf}
+  \end{center}
+  \caption[Record amount of each lods value]{Records amount distribution of each LODS value}
+  \label{fig:lods_distri_fig}
+\end{figure}
+
+
+\begin{comment}
+\begin{table}[]
+\centering
+    \caption{Records amount per LODS value}
+    \label{table:records_amount_per_lod}
+    \begin{tabular}{|l|l|}
+    \hline
+        \textbf{LODS Value} & \textbf{Amount} \\ \hline
+        0 & 9 \\ \hline
+        1 & 237 \\ \hline
+        2 & 815 \\ \hline
+        3 & 1404 \\ \hline
+        4 & 1300 \\ \hline
+        5 & 1055 \\ \hline
+        6 & 889 \\ \hline
+        7 & 541 \\ \hline
+        8 & 559 \\ \hline
+        9 & 386 \\ \hline
+        10 & 319 \\ \hline
+        11 & 184 \\ \hline
+        12 & 124 \\ \hline
+        13 & 101 \\ \hline
+        14 & 36 \\ \hline
+        15 & 43 \\ \hline
+        16 & 13 \\ \hline
+        17 & 12 \\ \hline
+        18 & 5 \\ \hline
+        19 & 0 \\ \hline
+        20 & 2 \\ \hline
+        21 & 0 \\ \hline
+        22 & 0 \\ \hline
+        \textbf{Total:} & 8034 \\ \hline
+    \end{tabular}
+\end{table}
+\end{comment}
+
+Both experiments used MacBook Air 2022, with M2 CPU, 24GB Memory. XGBoost model training uses Python XGBoost Library. PPCA was performed on Matlab with \textcite{jakob2015}. CNN models are from TensorFlow.
 
 \section{Experiment I}
-Experiment I uses only 1 value of each measurement in the first 12 hours. 
 
-Based on research from \textcite{asuroglu2021, johnson2013}, and some bed-side data as backup, we first get the maximum, minimum and average measurements of heart rate, respiratory rate, Systolic blood pressure(sbp), Diastolic blood pressure (dbp), mean arterial pressure (MAP), Oxygen Saturation (SPO2), temperature, glucose in the first 12 hours of ICU stay, the worst value of GCS, GCS eye, GCS motor, GCS verbal, GCS unable, the total urine output in the first 12 hours, and the most mechanical ventilation method in the first 12 hours which is ordered in Tracheostomy, Invasive Ventilation, Non Invasive Ventilation, High-flow nasal cannula (HFNC), Supplemental Oxygen and others. When collecting data, ventilation methods are coded with 1 to 6 based on the mechanical level. Moreover, patients' age and gender are also collected, where gender are coded with 0 for Male and 1 for Female.  These 33 measurements are used as input and the target is LODS value. 
-
-There are in total 8834 records. 
+Based on research from \textcite{asuroglu2021, johnson2013}, Vital signs and Glasgow Coma Scale are commonly used bed side data in this kind of research. So, we first collected the maximum, minimum and average measurements of heart rate, respiratory rate, Systolic blood pressure(sbp), Diastolic blood pressure (dbp), mean arterial pressure (MAP), Oxygen Saturation (SPO2), and temperature in the first 12 hours of ICU stay, the worst value of GCS, GCS eye, GCS motor, GCS verbal, GCS unable, the total urine output in the first 12 hours, and the most mechanical ventilation method in the first 12 hours which is ordered in Tracheostomy, Invasive Ventilation, Non Invasive Ventilation, High-flow nasal cannula (HFNC), Supplemental Oxygen and others. When collecting data, ventilation methods are coded with 1 to 6 based on the mechanical level. Moreover, patients' age and gender are also collected, where gender are coded with 0 for Male and 1 for Female.  These 30 measurements are used as input and the target is LODS value. 
 
 \subsection{Feature Engineering}
-After reviewing the data, some patients have bad maximum and minimum vital sign, but good average vital sign. The average values can not show the real situation of patient. So the average values are discarded.
+When reviewing the data, some patients have bad maximum and minimum values for one vital sign that might come from different record time, but the average value is in normal range, which gives one idea that the average values in this experiment can not show the real situation of patient. So the average values are discarded.
 
 To reduce the amount of features, the worst value are collected for the vital signs, as the rules in LODS and OASIS. However, to decide the worst value, a baseline value for each vital sign is used that the absolute difference between minimum/maximum value and baseline value is calculated. The one with larger absolute difference is the worst value. 
 
-For an adult, the normal value of each vital sign is a range. Then the baseline we use the median of the range that based on  we take baseline as table  ...
+For an adult, the normal value of each vital sign is a range. Then the baseline we use the median of the range that based on \textcite{medlineplus, johnsh, torp2023, yalemed}. We take baseline as \ref{table:baseline_value} and distinguish the worst value, for instance, if a patient has maximum heart rate as 101 and minimum heart rate as 65 in the first 12 hours, then 101 is taken as the worst value. All vital signs are checked with same way.
 \begin{table}[]
-\begin{tabular}{|l|l|}
-\hline
-\textbf{Measurements} & \textbf{Baseline Value}\\ \hline
-heart rate            & 80                \\ \hline
-sbp                   & 120               \\ \hline
-dbp                   & 80                \\ \hline
-map                   & 100               \\ \hline
-resp rate             & 14                \\ \hline
-temperature           & 16                \\ \hline
-spo2                  & 98                \\ \hline
-glucose               & 85                \\ \hline
-\end{tabular}
+\centering
+    \caption{Baseline values used in experiment I}
+    \label{table:baseline_value}
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Measurements} & \textbf{Baseline Value}\\ \hline
+            Heart Rate& 80                \\ \hline
+            Systolic Blood Pressure& 120               \\ \hline
+            Diastolic Blood Pressure& 80                \\ \hline
+            Mean Arterial Pressure& 100               \\ \hline
+            Respiratory Rate& 14\\ \hline
+            Temperature& 37\\ \hline
+            Oxygen Saturation& 98                \\\hline
+    \end{tabular}
 \end{table}
 
 \subsection{Experiment}
 
-All records are divided by 7:1:2 that 70\% for training, 10\% for validation and 20\% for test. 
+After gathering data from MIMIC-IV database, all records are divided by 8:2 that 80\% for training, and 20\% for test. There are 8034 records in total, 6427 records used for training the model and 1607 records used for testing. The records for testing will only be used when the model training is done which includes both training and validation. 
 
-After performing a feature engineering, it is proved that glucose value has no effect in predict result, so glucose is removed as well.
+Applying the two correlation coefficient to check the correlation between LODS value with each parameter and got a result as table \ref{table:cc_value} where we can find the direction of correlation (negative or positive) are same in both but the values and rankings are different. So we  decided to train models with both correlation ranking and compare the results. At this stage, sequential backward selection was applied to find the best feature set. The order is following the absolute value of correlation values from low to high, as the negative is only related to direction. At the same time, I found that GCS Motor and GCS Eyes have high correlation value, 0.7687 in Pearson. So, I kept one of them when training model with Pearson correlation, GCS Motor, because it has higher correlation value with LODS than GCS Eyes. Also, hyperparameters are modified, tree amount and tree depth, to avoid overfitting. Cross validation is also applied when training the models.
 
-Applying the two correlation coefficient to check and got a result as table ...
+\subsection{Result}
+As a result, we got a model with 8 features based on Pearson correlation, GCS, GCS Motors, Ventilation Status, SPO2, Urine output, Respiratory Rate, Heart Rate and sbp, which has the best performance. MAE 1.4173 and RMSE 1.8222 in the test dataset. With \ref{table:Perfomance_comparison} we can see the performance comparison. XGBoost models' performance are better than the others. The models that take features according to Pearson Correlation perform slightly better than these according to Spearman. \ref{fig:experiment_1_result} show the predicted value and actual value comparison of each model, where the black lines refer to the perfect situation that predicted value is same as actual value. From the figure, we can find both models perform well in LODS rang 2-5 and have similar distribution. But in LODS range 10 - 20, The model trained with XGBoost and features selected with Pearson Correlation (Hereinafter referred to as XG-Pearson) has better distribution than the model trained with XGBoost and features selected with Spearman Correlation (Hereinafter referred to as XG-Spearman), that predicted values of XG-Pearson is closer to the black line.
+
+\begin{table}[]
+\centering
+    \caption{Pearson and Spearman correlation coefficient}
+    \label{table:cc_value}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Feature} & \textbf{Pearson} & \textbf{Spearman} \\ \hline
+            GCS & -0.4286 & -0.1977 \\ \hline
+            GCS Motor & -0.4057 & -0.3932 \\ \hline
+            GCS Eyes & -0.3645 & -0.3396 \\ \hline
+            Ventilation & -0.2618 & -0.2705 \\ \hline
+            SPO2 & -0.2341 & -0.1416 \\ \hline
+            Urine Output & -0.2300 & -0.3154 \\ \hline
+            Respiratory Rate & 0.1715 & 0.1566\\ \hline
+            Heart Rate & 0.1633 & 0.1232 \\ \hline
+            sbp & -0.1572 & -0.2479 \\ \hline
+            dbp & -0.1109 & -0.2133 \\ \hline
+            map & -0.0889 & -0.2780 \\ \hline
+            Temperature & -0.0638 & -0.0067 \\ \hline
+            Age & 0.0505 & 0.0705 \\ \hline
+            Gender & 0.0146 & 0.0121 \\ \hline
+    \end{tabular}
+\end{table}
+
+
+\begin{table}[]
+\centering
+    \caption{Performance comparison in Experiment I}
+    \label{table:Perfomance_comparison}
+    \begin{tabular}{|l|l|l|l|l|}
+        \hline
+        \textbf{Model} & \textbf{Correlation} & \textbf{Features} & \textbf{MAE} & \textbf{RMSE} \\ \hline
+        \multirow{2}{*}{Linear Regression} & Spearman & 12 & 1.746 & 2.214 \\ \cline{2-5} 
+         & Pearson & 13 & 1.742 & 2.207 \\ \hline
+        \multirow{2}{*}{Random Forest} & Spearman & 14 & 1.434 & 1.856 \\ \cline{2-5} 
+         & Pearson & 13 & 1.433 & 1.856 \\ \hline
+        \multirow{2}{*}{XGBoost} & Spearman & 11& 1.427& 1.840\\ \cline{2-5} 
+         & Pearson & 8 & 1.417 & 1.822 \\ \hline
+    \end{tabular}
+\end{table}
+
+\begin{figure*}
+  \begin{center}
+    \subfigure[XGBoost with Pearson Correlation]{
+      \includegraphics[width=0.45\textwidth]{thesis/img/xg_pearson.png}
+      \label{subfig:xg_pearson}}
+    \qquad                        
+    \subfigure[XGBoost with Spearman Correlation]{
+      \includegraphics[width=0.45\textwidth]{thesis/img/xg_spearman.png}
+      \label{subfig:xg_spearman}}
+    \caption[Actual value \& Predicted value]{Comparison between actual LODS and predicted LODS in Experiment I}
+    \label{fig:experiment_1_result}
+  \end{center}
+\end{figure*}
 
 
 \section{Experiment II}
 
+The target of Experiment II is using data of each hour in the first 12 hours to predict LODS.
 
-\chapter{Results}
-\chapter{Conclusion}
-\chapter{Discussion}
+In this experiment, we collected maximum, minimum and average value of vital signs of each hour in the first 12 hours, include heart rate, sbp, map, dbp, spo2, temperature, and respiratory rate. Total urine output, worst ventilation status, and worst GCS values in the first 12 hours are collected as well. The criteria is that for each vital sign, there should be at least one record in the 12 hours. Moreover, because the vital signs are monitored and recorded depends on patients' situation, not all vital signs are recorded every hour for each patient. Then there are missing data, mostly missing at random (MAR) and not missing at random (NMAR). In most situation, if a patient has recorded data in the 4 hours before move to ICU, there won't be data recorded in the first hour. So when collect data, the first hour includes the 4 hours before move into ICU and the first hour in ICU.
+
+\subsection{Missing Data Imputation}
+
+Two missing data imputation methods are applied in this experiment, linear imputation and PPCA. In this experiment, data missing only happens on vital signs data, where there should be 21*12 data collected. To perform the imputation, the data are listed in a 21*12 structure, ordered with time-series.
+
+According to an interview with a medical doctor, \enquote{When checking a patient's situation, trend is more important than the exact vital sign number}. When imputing missing data, we try to keep each missing data in a trend, then linear interpolation is applied to calculate missing data. If data of the first hour or the first several hours are missing, then the first recorded data is applied on the first several hours. Same criteria applies on the last hour or the last several hours.
+
+PPCA is performed on each records, which means each record will has its own missing data imputation process as data missing criteria varies from record to record. This process is executed with Matlab. As the data are imputed with probability calculation. There will be different value imputed for same missing data in different PPCA running processes. So the imputation was ran 5 times. Then 10 randomly selected values are compared to check the imputed result, that the criteria is that to find the better imputed results. We consider the result which is closer to the average of a total of 5 hours before and after the missing value is the better value. The 3 files with most "better imputed results" are randomly combined to create a new dataset for training.
+
+
+\subsection{Feature Engineering}
+
+In this experiment, vital signs are collected hour by hour, while the others are collected once with the worst or total value. So they are processed in different ways. Vital signs are processed with a feature engineering to extract a features from the 21*12 data. The others, total urine output, ventilation and GCS values, are proceeded without feature engineering as 1) urine output might not be an continuous operation happens in every hour or not recorded as frequent as vital signs. 2) GCS values are not recorded frequently, mostly there are less than 3 times in the first 12 hours. 3) ventilation changes very little.
+
+With review the imputed missing data, we decided to keep the average value only with reasons: 1) patients' situation don't have large changes in one hour which means the maximum value and minimum value don't have a large gap. So it's not needed to perform the worst check as experiment I. 2) mostly there is only one value recorded in each hour, which means maximum, minimum and average are the same value. 3) To take a trend, it is either all data are maximum, or all data are minimum. But the worst value might change between maximum and minimum which will affect the trend. However, average value could show the trend. 
+
+CNN algorithm is applied on the rest 7*12 data to extract the features. We trained models for both dataset imputed with linear imputation and PPCA. To train the model, LODS is set as target and the average vital signs of the first 12 hours are set as input. Two models are trained, best performance of each model is kept to extract data. The performance is evaluated with MSE and MAE. Then remove the last layer and take the out put as the features. (pic is needed for both models)
+
+When training the models, we found that the MAE of both models are almost same, but the model trained with dataset imputed by PPCA has better MSE, as \ref{table:cnn_result_comparison}. This might causes from the imputed data, which let CNN model learn more details.
+
+\begin{table}[]
+\centering
+    \caption{Feature engineering with CNN result comparison}
+    \label{table:cnn_result_comparison}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Imputation Method} & \textbf{MAE} & \textbf{MSE} \\ \hline
+        Linear Interpolation & 2.0494 & 6.9286 \\ \hline
+        PPCA & 2.0503 & 6.8565 \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Experiment}
+The extracted features are combined with other features in model training period, include total urine output, the worst ventilation status, the worst GCS related values. According to the correlation coefficient got in Experiment I, gender and age are removed in this experiment. 
+
+As the feature amount in a XGBoost model affects the performance, it's important to manage the feature amount. However, in CNN model, the parameter of the last layer decides the amount of outputted values. So the best way is to adjust two models together, the parameters of layers in CNN model and the hyper-parameter of XGBoost model. In CNN model, we adjust the parameters since the last layer, mainly the output amount, and one by one back the the first layer. In XGBoost model, the we adjust the amount of trees and the maximum depth of each tree to balance the amount of inputted features from CNN model, which aims to prevent overfitting and achieve the best performance.
+
+\subsection{Result}
+As a result, with the data imputed with linear interpolation (Hereinafter referred to as XG-CNN-LI) , we got a model that combines a CNN model of 9 layers and 16 outputs, and a XGBoost model with 100 trees, as figure. The result of the model is that RMSE is 1.912 and MAE is 1.481. With the data imputed with PPCA (Hereinafter referred to as XG-CNN-PPCA) , we got a model that combines a CNN model of 9 layers and 24 outputs and a XGBoost model with 100 trees, as figure. The result of the model is that RMSE is 1.916 and MAE is 1.468.
+
+Compare the results of two models, performance of both models are similar. However, XG-CNN-PPCA model acts better in MAE but slightly worse on RMSE. The reason may be that it has model features input to predicting part, XGBoost training part, which causes a higher fitting level. \ref{fig:experiment_2_result} show the predicted value and actual value comparison of the two models, where the black lines refer to the perfect situation. XG-CNN-LI model performs well in predicting values range 2-5 and distributes similar in all LODS value range. When predicting values range 2 to 3, the predicted values mostly more than actual values. While predicting values range 7 to 15, the predicted values are mostly less than actual values. In contrast, XG-CNN-PPCA distributes similar in LODS ranges 1-14, only when actual value is 15, it has a bad performance. And it performs well in LODS range 2 to 6, where more values close to perfect situation.
+
+\begin{figure*}
+  \begin{center}
+    \subfigure[XG-CNN-LI model]{
+      \includegraphics[width=0.45\textwidth]{thesis/img/xg_cnn_li.png}
+      \label{subfig:xg_cnn_li}}
+    \qquad                        
+    \subfigure[XG-CNN-PPCA model]{
+      \includegraphics[width=0.45\textwidth]{thesis/img/xg_cnn_ppca.png}
+      \label{subfig:xg_cnn_ppca}}
+    \caption[Actual value \& Predicted value]{Comparison between actual LODS and predicted LODS in Experiment II result}
+
+    \label{fig:experiment_2_result}
+  \end{center}
+\end{figure*}
+
+
+\chapter{Conclusion and Discussion}
+\label{ch:conclusion}
+Proved in the two experiments, predicting total LODS value of first day in ICU is practicable via machine learning with first 12 hours bed-side data in ICU. With this total LODS value and original formula from LODS, patients' severity of death can be calculated. All models perform well in range LODS value 2-5, because there are many records in this range, much more than other LODS value. When considering patients' situation in this range, not a dangerous condition, the current MAE is acceptable. The model trained in Experiment I with Pearson Correlation Coefficient can be considered as a good prediction model.
+
+But on other LODS, the performance are bad. The reason might be data for those values are too little, especially for those LODS value over 17. There are only 7 records in total 8034 records, less than 0.1\%. They might be considered as abnormal values during training. After randomly split to training set and test set, there will be less in training set, or even no records. Then even with cross validation, these records may be too little. So for further study, there should be more data in range 15 - 22 be used in training. These data need more weight as they represent a bad patient's situation. Accuracy in this range need to be higher than in range 0-5.
+
+In Experiment I, Pearson Correlation Coefficient and Spearman Correlation Coefficient are used. Their performance are different. Pearson Correlation Coefficient worked better then Spearman Correlation Coefficient, that model with Pearson correlation uses less features and provide better prediction result than the model with Spearman correlation. Pearson correlation originally measures linear relationship between two variables. But vital signs or ventilation status shouldn't have directly linear relationship with LODS value. The connection is that some vital signs, for instance heat rate, are involved in LODS parameters, but this can not be considered as linear relationship. This experiment show a new thought, that even though features and target don't have linear relationship, Pearson Correlation Coefficient can still be used to measure correlation.
+
+Moreover, with both correlation coefficients, GCS Motor and GCS Eyes have high correlation with LODS value. When considering these values background, we can take a wild guess that human movement condition and eye reaction condition may also represent overall organ system situation, or partly represent. 
+
+In Experiment II, PPCA and Linear Interpolation are both applied and compared. In both feature engineering  period and XGBoost model training period, the dataset whose missing value are imputed with PPCA acts better than Linear Interpolation. Even though the difference is small, we can still get a conclusion that PPCA is a better option to perform missing data imputation than linear interpolation. Moreover, when compare results, XG-CNN-PPCA has a better distribution in all LODS ranges. It is a more promising model. It may perform much better when more data whose actual value ranges in 15 to 22 are included in training.
+
+When compare results of experiment I and experiment II, experiment I results are better than experiment II. The feature engineering with CNN did not give better result. We can not conclude that model with XGBoost only must be better than the model with both CNN and XGBoost. The experiment II has more steps and is more complicated than experiment I. Its missing data are imputed with calculation which are different from the real data. While all the data used in experiment I are real data, which causes less uncertainties or error than experiment I. A complicated model accompanied by more uncertainties which may affect the final performance of a model. Occam's razor may also applied in model training, that the simplest model would be usually the best one.
+
+
+\section{Further Research}
+Data source, this research uses data from MIMIC-IV which takes medical data from Boston, Massachusetts. However, LODS was originally developed based on data from France. Due to difference in weather, diet and geographical condition, people live in these places have different body condition. So medical data from France or western Europe is another good option as data source and may train a model with better performance than the models in this study.
+
+LODS is proved to be useful for ICU patients in the first 7 days stay. Patients' data in the first 7 days can also be included in similar study. But it should be used as a separated test set for validation, because LODS is originally designed for first 24h ICU stay.
+
+Now, we have proved that machine learning with bed-side data can be used to predict total LODS value to show patient's organ systems situation. Bed side data and machine learning can also be brought to predicting score for each organ system. Then for each organ system, less features may needed, for instance urine output may not needed for cardiovascular as it mainly measures the situation of renal.
+
 
 
 
