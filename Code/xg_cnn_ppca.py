@@ -89,22 +89,22 @@ print('Mean Absolute Error:', mae)
     # Predicted vs Actural
 # plt.scatter(y_pred, y_test)
 
-# heatmap, xedges, yedges = np.histogram2d(y_test, y_pred, bins=10)
+heatmap, xedges, yedges = np.histogram2d(y_test, y_pred, bins=10)
 
-# # Normalize the heatmap values to the range [0, 1]
-# heatmap = heatmap.T / np.max(heatmap)
+# Normalize the heatmap values to the range [0, 1]
+heatmap = heatmap.T / np.max(heatmap)
 
-# # Plot the actual vs predicted values with transparency based on point density
-# plt.scatter(y_test, y_pred, alpha=heatmap.flatten())
+# Plot the actual vs predicted values with transparency based on point density
+plt.scatter(y_test, y_pred, alpha=heatmap.flatten())
 
-# # Add a diagonal line representing perfect prediction
-# plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='black', linestyle='--')
+# Add a diagonal line representing perfect prediction
+plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='black', linestyle='--')
 
 
-# plt.xlabel('Actual Values')
-# plt.ylabel('Predicted Values')
-# plt.title('Predicted vs. Actual Plot')
-# plt.show()
+plt.xlabel('Actual Values')
+plt.ylabel('Predicted Values')
+plt.title('Predicted vs. Actual Plot')
+plt.show()
 
     # Residuals plot
 # import seaborn as sns

@@ -11,7 +11,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
 
 # Read the CSV file into a DataFrame
-data = pd.read_csv('data12h.csv')
+data = pd.read_csv('data12h_train_dataset.csv')
 
 data['sex'] = np.where(data['gender'] == "M", 0, 1)
 data['heart_rate'] = np.where(abs(data['heart_rate_min'] - 80) >= abs(data['heart_rate_max'] - 80), data['heart_rate_min'], data['heart_rate_max'])
@@ -89,53 +89,53 @@ print('Mean Absolute Error:', mae)
 
 # xgb_model.save_model('xgb_model_pearson.model')
 
-bins = np.arange(0, 23, 1)
+# bins = np.arange(0, 23, 1)
 
-# Initialize lists to store the mode of y values for each bin
-mode_y_values = []
+# # Initialize lists to store the mode of y values for each bin
+# mode_y_values = []
 
-# Loop through each bin
-for i in range(len(bins) - 1):
-    # Filter y values within the current bin
-    y_in_bin = [y for x, y in zip(y_test, y_pred) if bins[i] <= x < bins[i + 1]]
-    # Find the mode of y values in the bin
-    if y_in_bin:
-        mode_y = max(set(y_in_bin), key=y_in_bin.count)
-        mode_y_values.append(mode_y)
-    else:
-        mode_y_values.append(None)  # No data in the bin, mark as None
+# # Loop through each bin
+# for i in range(len(bins) - 1):
+#     # Filter y values within the current bin
+#     y_in_bin = [y for x, y in zip(y_test, y_pred) if bins[i] <= x < bins[i + 1]]
+#     # Find the mode of y values in the bin
+#     if y_in_bin:
+#         mode_y = max(set(y_in_bin), key=y_in_bin.count)
+#         mode_y_values.append(mode_y)
+#     else:
+#         mode_y_values.append(None)  # No data in the bin, mark as None
 
-# Plot the line representing the mode of y values for each bin
-plt.plot(np.arange(0, 22, 1), mode_y_values, marker='o', linestyle='-')
-plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='black', linestyle='--')
+# # Plot the line representing the mode of y values for each bin
+# plt.plot(np.arange(0, 22, 1), mode_y_values, marker='o', linestyle='-')
+# plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='black', linestyle='--')
 
-# Add labels and title
-plt.xlabel('X-axis')
-plt.ylabel('Y-axis')
-plt.title('Line representing the mode of y values for each bin')
+# # Add labels and title
+# plt.xlabel('X-axis')
+# plt.ylabel('Y-axis')
+# plt.title('Line representing the mode of y values for each bin')
 
-# Display the plot
-plt.show()
+# # Display the plot
+# plt.show()
 
     # Predicted vs Actural
 # plt.scatter(y_pred, y_test)
 
-# heatmap, xedges, yedges = np.histogram2d(y_test, y_pred, bins=10)
+heatmap, xedges, yedges = np.histogram2d(y_test, y_pred, bins=10)
 
-# # Normalize the heatmap values to the range [0, 1]
-# heatmap = heatmap.T / np.max(heatmap)
+# Normalize the heatmap values to the range [0, 1]
+heatmap = heatmap.T / np.max(heatmap)
 
-# # Plot the actual vs predicted values with transparency based on point density
-# plt.scatter(y_test, y_pred, alpha=heatmap.flatten())
+# Plot the actual vs predicted values with transparency based on point density
+plt.scatter(y_test, y_pred, alpha=heatmap.flatten())
 
-# # Add a diagonal line representing perfect prediction
-# plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='black', linestyle='--')
+# Add a diagonal line representing perfect prediction
+plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='black', linestyle='--')
 
 
-# plt.xlabel('Actual Values')
-# plt.ylabel('Predicted Values')
-# plt.title('Predicted vs. Actual Plot')
-# plt.show()
+plt.xlabel('Actual Values')
+plt.ylabel('Predicted Values')
+plt.title('Predicted vs. Actual Plot')
+plt.show()
 
     # Residuals plot
 # import seaborn as sns
