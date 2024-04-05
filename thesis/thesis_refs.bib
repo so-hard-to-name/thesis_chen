@@ -520,32 +520,6 @@
                patients",
   author    = "Sekulic, Ana D and Trpkovic, Sladjana V and Pavlovic, Aleksandar
                P and Marinkovic, Olivera M and Ilic, Aleksandra N",
-  abstract  = "BACKGROUND: The aim of this study was to determine which of the
-               most commonly used scoring systems for evaluation of critically
-               ill patients in the ICU is the best and simplest to use in our
-               hospital. MATERIAL AND METHODS: This prospective study included
-               60 critically ill patients. After admittance to the ICU, APACHE
-               II, SAPS II, and MPM II0 were calculated. During further
-               treatment in the ICU, SOFA and MPM II were calculated at 24 h,
-               48 h, and 72 h and 7 days after admittance using laboratory and
-               radiological measures. RESULTS: In comparison with survivors,
-               non-survivors were older (p<0.01) and spent significantly more
-               days on mechanical ventilation (p<0.01). ARDS was significantly
-               more common in patients who survived compared to those who did
-               not (chi-square=7.02, p<0.01), which is not the case with sepsis
-               (chi-square=0.388, p=0.53). AUROC SAPS II was 0.690, and is only
-               slightly higher than the other 2 AUROC incipient scoring
-               systems, MPM II and APACHE II (0.654 and 0.623). The APACHE II
-               has the highest specificity (81.8\%) and MPM II the highest
-               sensitivity (85.2\%). MPM II(7day) AUROC (1.0) shows the best
-               discrimination between patients who survived and those who did
-               not. MPM II(48) (0.836), SOFA(72) (0.821) and MPM II(72) (0.817)
-               also had good discrimination scores. CONCLUSIONS: APACHE II and
-               SAPS II measured on admission to the ICU were significant
-               predictors of complications. MPM II(7day) has the best
-               discriminatory power, followed by SOFA(7day) and MPM II(48). MPM
-               II(7day) has the best calibration followed by SOFA(7day) and
-               APACHE II.",
   journal   = "Med. Sci. Monit.",
   publisher = "International Scientific Information, Inc.",
   volume    =  21,
@@ -554,6 +528,57 @@
   year      =  2015,
   language  = "en"
 }
+
+@article{ngiam2019,
+title = {Big data and machine learning algorithms for health-care delivery},
+journal = {The Lancet Oncology},
+volume = {20},
+number = {5},
+pages = {e262-e273},
+year = {2019},
+issn = {1470-2045},
+doi = {https://doi.org/10.1016/S1470-2045(19)30149-4},
+url = {https://www.sciencedirect.com/science/article/pii/S1470204519301494},
+author = {Kee Yuan Ngiam and Ing Wei Khor},
+}
+
+@online{GDPR2016,
+  date       = {2016-05-04},
+  location   = {OJ L 119, 4.5.2016, p. 1--88},
+  title      = {Regulation ({EU}) 2016/679 of the {European} {Parliament} and of the {Council}},
+  url        = {https://data.europa.eu/eli/reg/2016/679/oj},
+  titleaddon = {of 27 {April} 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data, and repealing {Directive} 95/46/{EC} ({General} {Data} {Protection} {Regulation})},
+  abstract   = {The General Data Protection Regulation (2016/679, "GDPR") is a Regulation in European Union (EU) law on data protection and privacy in the EU and the European Economic Area (EEA).},
+  author     = {{European Parliament} and {Council of the European Union}},
+  keywords   = {access consumer data data-processing freedom gdpr information justice law personal privacy protection security verification},
+  urldate    = {2024-04-05},
+}
+
+@online{california2024,
+  date       = {2024-03-13},
+  
+  title      = {California Consumer Privacy Act (CCPA)},
+  url        = {https://oag.ca.gov/privacy/ccpa},
+  author     = {State of California Department of Justice},
+  urldate    = {2024-04-05},
+}
+
+@ARTICLE{Pollard2018,
+  title     = "The {eICU} Collaborative Research Database, a freely available
+               multi-center database for critical care research",
+  author    = "Pollard, Tom J and Johnson, Alistair E W and Raffa, Jesse D and
+               Celi, Leo A and Mark, Roger G and Badawi, Omar",
+  journal   = "Sci. Data",
+  publisher = "Springer Science and Business Media LLC",
+  volume    =  5,
+  number    =  1,
+  pages     = "180178",
+  month     =  sep,
+  year      =  2018,
+  copyright = "https://creativecommons.org/licenses/by/4.0",
+  language  = "en"
+}
+
 
 @ARTICLE{goldberger2000,
   title     = "{PhysioBank}, {PhysioToolkit}, and {PhysioNet}: components of a
@@ -643,14 +668,33 @@
     url = {https://www.sciencedirect.com/science/article/pii/S0169260720316497},
     author = {Tunç Aşuroğlu and Hasan Oğul},
     keywords = {Sepsis, prognosis, vital signs, SOFA score, deep learning, early detection},
-    abstract = {Background and objective
-    Sepsis occurs in response to an infection in the body and can progress to a fatal stage. Detection and monitoring of sepsis require multi-step analysis, which is time-consuming, costly and requires medically trained personnel. A metric called Sequential Organ Failure Assessment (SOFA) score is used to determine the severity of sepsis. This score depends heavily on laboratory measurements. In this study, we offer a computational solution for quantitatively monitoring sepsis symptoms and organ systems state without laboratory test. To this end, we propose to employ a regression-based analysis by using only seven vital signs that can be acquired from bedside in Intensive Care Unit (ICU) to predict the exact value of SOFA score of patients before sepsis occurrence.
-    Methods
-    A model called Deep SOFA-Sepsis Prediction Algorithm (DSPA) is introduced. In this model, we combined Convolutional Neural Networks (CNN) features with Random Forest (RF) algorithm to predict SOFA scores of sepsis patients. A subset of Medical Information Mart in Intensive Care (MIMIC) III dataset is used in experiments. 5154 samples are extracted as input. Ten-fold cross validation test are carried out for experiments.
-    Results
-    We demonstrated that our model has achieved a Correlation Coefficient (CC) of 0.863, a Mean Absolute Error (MAE) of 0.659, a Root Mean Square Error (RMSE) of 1.23 for predictions at sepsis onset. The accuracies of SOFA score predictions for 6 hours before sepsis onset were 0.842, 0.697, and 1.308, in terms of CC, MAE and RMSE, respectively. Our model outperformed traditional machine learning and deep learning models in regression analysis. We also evaluated our model's prediction performance for identifying sepsis patients in a binary classification setup. Our model achieved up to 0.982 AUC (Area Under Curve) for sepsis onset and 0.972 AUC for 6 hours before sepsis, which are higher than those reported by previous studies.
-    Conclusions
-    By utilizing SOFA scores, our framework facilitates the prognose of sepsis and infected organ systems state. While previous studies focused only on predicting presence of sepsis, our model aims at providing a prognosis solution for sepsis. SOFA score estimation process in ICU depends on laboratory environment. This dependence causes delays in treating patients, which in turn may increase the risk of complications. By using easily accessible non-invasive vital signs that are routinely collected in ICU, our framework can eliminate this delay. We believe that the estimation of the SOFA score will also help health professionals to monitor organ states.}
+}
+
+@INPROCEEDINGS{Zhale2021,
+  author={Nowroozilarki, Zhale and Pakbin, Arash and Royalty, James and Lee, Donald K.K. and Mortazavi, Bobak J.},
+  booktitle={2021 IEEE EMBS International Conference on Biomedical and Health Informatics (BHI)}, 
+  title={Real-time Mortality Prediction Using MIMIC-IV ICU Data Via Boosted Nonparametric Hazards}, 
+  year={2021},
+  volume={},
+  number={},
+  pages={1-4},
+  keywords={Conferences;MIMICs;Tools;Alarm systems;Real-time systems;Hazards;Data models;Electronic Health Record;Survival analysis;Hazard estimation;Nonparametric;Time-dependent covariates;MIMIC IV Dataset},
+  doi={10.1109/BHI50953.2021.9508537}
+}
+
+
+@Article{sin2022,
+AUTHOR = {Šín, Petr and Hokynková, Alica and Marie, Nováková and Andrea, Pokorná and Krč, Rostislav and Podroužek, Jan},
+TITLE = {Machine Learning-Based Pressure Ulcer Prediction in Modular Critical Care Data},
+JOURNAL = {Diagnostics},
+VOLUME = {12},
+YEAR = {2022},
+NUMBER = {4},
+ARTICLE-NUMBER = {850},
+URL = {https://www.mdpi.com/2075-4418/12/4/850},
+PubMedID = {35453898},
+ISSN = {2075-4418},
+DOI = {10.3390/diagnostics12040850}
 }
 
 @ARTICLE{johnson2013,
@@ -1096,6 +1140,13 @@ author = {Daniel Kirk and Cagatay Catal and Bedir Tekinerdogan},
   publisher={Springer}
 }
 
+@book{kevin2012,
+ author = "Kevin P. Murphy",
+ title = "Machine Learning: a Probabilistic Perspective",
+ publisher = "MIT Press",
+ year = 2012,
+ url = "https://probml.github.io/pml-book/book0.html"
+}
 
 @article{rubin1976,
     author = {RUBIN, DONALD B.},
@@ -1113,12 +1164,49 @@ author = {Daniel Kirk and Cagatay Catal and Bedir Tekinerdogan},
     eprint = {https://academic.oup.com/biomet/article-pdf/63/3/581/756166/63-3-581.pdf},
 }
 
-@online{paul1999,
-  author = {Paul Bourke},
-  title = {Interpolation methods},
-  year = 1999,
-  url = {https://paulbourke.net/miscellaneous/interpolation/},
-  urldate = {2024-02-11}
+@ARTICLE{Kim2011,
+  title    = "A Comparison of Intensive Care Unit Mortality Prediction Models
+              through the Use of Data Mining Techniques",
+  author   = "Kim, Sujin and Kim, Woojae and Park, Rae Woong",
+  abstract = "OBJECTIVES: The intensive care environment generates a wealth of
+              critical care data suited to developing a well-calibrated
+              prediction tool. This study was done to develop an intensive care
+              unit (ICU) mortality prediction model built on University of
+              Kentucky Hospital (UKH)'s data and to assess whether the
+              performance of various data mining techniques, such as the
+              artificial neural network (ANN), support vector machine (SVM) and
+              decision trees (DT), outperform the conventional logistic
+              regression (LR) statistical model. METHODS: The models were built
+              on ICU data collected regarding 38,474 admissions to the UKH
+              between January 1998 and September 2007. The first 24 hours of
+              the ICU admission data were used, including patient demographics,
+              admission information, physiology data, chronic health items, and
+              outcome information. RESULTS: Only 15 study variables were
+              identified as significant for inclusion in the model development.
+              The DT algorithm slightly outperformed (AUC, 0.892) the other
+              data mining techniques, followed by the ANN (AUC, 0.874), and SVM
+              (AUC, 0.876), compared to that of the APACHE III performance
+              (AUC, 0.871). CONCLUSIONS: With fewer variables needed, the
+              machine learning algorithms that we developed were proven to be
+              as good as the conventional APACHE III prediction.",
+  journal  = "Healthc Inform Res",
+  volume   =  17,
+  number   =  4,
+  pages    = "232--243",
+  month    =  dec,
+  year     =  2011,
+  address  = "Korea (South)",
+  keywords = "APACHE; Decision Trees; Intensive Care Units; Neural Networks;
+              Support Vector Machines",
+  language = "en"
+}
+
+@online{sagar2024,
+  author = {Sagar Shukla},
+  title = {Regression in machine learning},
+  year = 2024,
+  url = {https://www.geeksforgeeks.org/regression-in-machine-learning/},
+  urldate = {2024-03-11}
 }
 
 @article{huang2021,
