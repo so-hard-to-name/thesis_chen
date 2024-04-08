@@ -161,7 +161,7 @@ April 2024
 
 ~
 
-\noindent\textbf{Keywords:} machine learning, organ dysfunction score, deep learning, Explainable AI
+\noindent\textbf{Keywords:} machine learning, organ dysfunction score, bedside data, deep learning
 
 ~
 
@@ -238,12 +238,13 @@ Two experiments were executed in this study. In Experiment I, we trained two mod
 
 This document is structured as follow. 
 \begin{itemize}
-\item Chapter ~\ref{ch:background} shows the basic organ dysfunction scoring system and machine learning concept. 
-\item Chapter ~\ref{ch:priorwork} shows prior related research in similar fields, mostly about predicting and evaluating patients' situation with bed side data. 
-\item Chapter ~\ref{ch:methods} introduces the data source and the algorithms used in this study. 
-\item Chapter ~\ref{ch:experiment} shows the experiments' details and results. 
-\item Chapter ~\ref{ch:discussion} discusses the result and shortcomings of this study and some further research direction. 
-\item And chapter ~\ref{ch:conclusion} provides a conclusion of this thesis.
+\item Chapter ~\ref{ch:background} provides an overview of basic organ dysfunction scoring systems and fundamental machine learning concepts.
+\item Chapter ~\ref{ch:priorwork} reviews prior research conducted in similar fields, focusing primarily on predicting and evaluating patients' conditions using bedside data. 
+\item Chapter ~\ref{ch:methods} introduces the data sources utilized in this study and outlines the algorithms employed for model training. 
+\item Chapter ~\ref{ch:experiment} delves into the details of the two experiments conducted, including procedures for missing data imputation, feature extraction, and prediction model training.
+\item Chapter \ref{ch:results} presents the results obtained from the two experiments conducted in the study.
+\item Chapter ~\ref{ch:discussion} critically discusses the results and identifies potential shortcomings of the study.
+\item And chapter ~\ref{ch:conclusion} offers concluding remarks on the thesis.
 \end{itemize}
 
 
@@ -868,10 +869,9 @@ For adults, the normal range for each vital sign is typically defined by a range
 
 After reducing the features, all collected records were divided into an 80:20 ratio for training and testing purposes, respectively. With a total of 8034 records available, 6427 records were allocated for training the model, while the remaining 1607 records were reserved for testing. During the model training process, which encompasses both training and validation, the testing records were not utilized. These reserved records are exclusively employed for evaluating the model's performance after it has been trained on the training dataset. 
 
-Applying the two correlation coefficient to check the correlation between LODS value with each parameter and got a result as table \ref{table:cc_value} where we can find the direction of correlation (negative or positive) are same in both but the values and rankings are different. So we  decided to train models with both correlation ranking and compare the results. At this stage, sequential backward selection was applied to find the best feature set. The order is following the absolute value of correlation values from low to high, as the negative is only related to direction. At the same time, I found that GCS Motor and GCS Eyes have high correlation value, 0.7687 in Pearson. So, I kept one of them when training model with Pearson correlation, GCS Motor, because it has higher correlation value with LODS than GCS Eyes. Also, hyperparameters are modified, tree amount and tree depth, to avoid overfitting. 
+The original intention behind utilizing both Pearson Correlation Coefficient and Spearman Correlation Coefficient was to amalgamate their results to identify the best feature set. However, after applying two correlation coefficients to assess the correlation between LODS values and each parameter, we obtained results as presented in Table \ref{table:cc_value}. Notably, we observed that while the direction of correlation (negative or positive) remained consistent across both coefficients, the actual correlation values and rankings differed. Consequently, we made the decision to train models utilizing both correlation rankings and subsequently compare the results. At this stage, we employed sequential backward selection to identify the optimal feature set. The selection process involved removing features in order of their absolute correlation values, from low to high. Given the high correlation value of 0.7687 between GCS Motor and GCS Eyes in the Pearson correlation, we opted to retain GCS Motor for training the model, as it exhibited a higher correlation value with LODS compared to GCS Eyes, only in the model trained based on Pearson Correlation.
 
-\subsection{Result}
-As a result, we got a model with 8 features based on Pearson correlation, GCS, GCS Motors, Ventilation Status, SPO2, Urine output, Respiratory Rate, Heart Rate and sbp, which has the best performance. MAE 1.4173 and RMSE 1.8222 in the test dataset. With Table \ref{table:Perfomance_comparison} we can see the performance comparison. XGBoost models' performance are better than the others. The models that take features according to Pearson Correlation perform slightly better than these according to Spearman. Figure \ref{fig:experiment_1_result} show the predicted value and actual value comparison of each model, where the black lines refer to the perfect situation that predicted value is same as actual value. From the figure, we can find both models perform well in LODS rang 2-5 and have similar distribution. But in LODS range 10 - 20, The model trained with XGBoost and features selected with Pearson Correlation (Hereinafter referred to as XG-Pearson) has better distribution than the model trained with XGBoost and features selected with Spearman Correlation (Hereinafter referred to as XG-Spearman), that predicted values of XG-Pearson is closer to the black line.
+Moreover, we adjusted hyperparameters such as tree amount and tree depth to mitigate the risk of overfitting during model training. This proactive measure ensures that our models generalize well to unseen data and produce reliable predictions.
 
 \begin{table}[]
 \centering
@@ -898,6 +898,86 @@ As a result, we got a model with 8 features based on Pearson correlation, GCS, G
 \end{table}
 
 
+\section{Experiment II}
+
+According to an interview with a medical doctor, \enquote{When checking a patient's situation, trend is more important than the exact vital sign number}. The target of Experiment II is using data of each hour in the first 12 hours to predict LODS so that we can take vital signs trend analysis as part of the features for prediction.
+
+In this experiment, we collected the maximum, minimum, and average values of vital signs for each hour within the initial 12-hour period, including heart rate, systolic blood pressure (sbp), mean arterial pressure (map), diastolic blood pressure (dbp), oxygen saturation (spo2), temperature, and respiratory rate. Additionally, we incorporated total urine output, worst ventilation status, and worst Glasgow Coma Scale (GCS) values recorded during the first 12 hours.
+
+Given the variability in vital sign monitoring and recording, not all vital signs are consistently recorded for every patient at every hour, resulting in missing data. These missing data points are primarily categorized as missing at random (MAR) and not missing at random (NMAR).
+
+To address the missing data, we employed two separate imputation methods: Linear Interpolation and Probabilistic Principal Component Analysis (PPCA). Subsequently, models were trained using the datasets imputed with each method individually. Performance comparison was conducted using Mean Absolute Error (MAE) and Root Mean Square Error (RMSE) metrics.
+
+\subsection{Missing Data Imputation}
+
+In this experiment, two missing data imputation methods, namely linear interpolation and Probabilistic Principal Component Analysis (PPCA), were applied. The missing data occurred exclusively in the vital signs data, which should ideally consist of 21 values per hour for each of the 12 hours.
+
+To facilitate the imputation process, the available data were structured in a 21x12 matrix, ordered chronologically according to time-series. This matrix format allowed for a systematic approach to missing data imputation, enabling the application of both linear interpolation and PPCA methods effectively.
+
+When imputing missing data, our aim is to maintain the overall trend of the data. For this purpose, we apply linear interpolation to calculate missing values. Specifically, if data for the first hour or the first several hours are missing, we propagate the first recorded data value across those missing hours. Similarly, if data for the last hour or the last several hours are missing, we extend the last recorded data value to cover those missing hours. This approach ensures consistency and coherence in the imputed dataset while preserving the temporal trends observed in the original data.
+
+In the PPCA process, each record undergoes its own missing data imputation procedure, as the criteria for missing data varies from record to record. This individualized imputation is carried out using probabilistic calculations, with PPCA executed using MATLAB. Since the imputation involves probability calculations, different values may be imputed for the same missing data in different PPCA runs. To mitigate this variability, the imputation process is repeated five times.
+
+To assess the quality of the imputed values, we randomly select 10 values from each imputation run and compare them. The criterion for selecting the better-imputed value is based on proximity to the average of the values observed five hours before and after the missing value. The three files with the most "better-imputed results" are randomly combined to create a new dataset for training purposes. This approach ensures that the imputed dataset reflects the most reliable imputed values, contributing to the robustness of the subsequent model training process.
+
+
+\subsection{Feature Engineering}
+
+In this experiment, the processing of vital signs differs from that of other variables due to their distinct nature. Vital signs are collected on an hourly basis and undergo feature engineering to extract features from the 21x12 data matrix. This approach is chosen because vital signs are typically recorded hourly, resulting in a dense time-series dataset. Feature engineering enables us to extract meaningful features from this dense data, capturing relevant patterns and trends. On the other hand, variables include total urine output, ventilation status, and GCS values, are processed differently because 1) rine output might not be an continuous operation happens in every hour or not recorded as frequent as vital signs. 2) GCS values are often recorded infrequently, with fewer than three recordings typically observed within the first 12 hours. Thus, the raw values are utilized directly in the analysis. 3) Ventilation status tends to change minimally over time. Therefore, feature engineering is unnecessary, and the raw ventilation status data are used directly in the analysis.
+
+After reviewing the imputed missing data, we have decided to retain only the average value for several reasons: 1) Patients' physiological parameters typically do not undergo large changes within a single hour. Consequently, the difference between the maximum and minimum values within an hour is typically negligible. Therefore, there is no substantial benefit to performing a worst-case check, as was done in Experiment I. 2) In most cases, only one value is recorded for each vital sign per hour. This means that the maximum, minimum, and average values are identical. 3) Maintaining consistency in the data trend is crucial. When considering trends, it is either all values are maximum or all values are minimum within an hour. However, if the worst value fluctuates between maximum and minimum, it can disrupt the trend analysis. On the other hand, the average value effectively captures the trend without the potential for such disruption. 
+
+In this experiment, the Convolutional Neural Network (CNN) algorithm is applied to the remaining 7x12 data (after feature extraction from the vital signs data). The goal is to extract features from this data. To train the CNN models, two datasets are utilized: one imputed with linear interpolation and the other with PPCA. The target variable is set as the LODS, while the average vital signs of the first 12 hours serve as the input features.
+
+Separate CNN models are trained for each dataset, and their performance is evaluated using Mean Squared Error (MSE) and Mean Absolute Error (MAE). The best-performing model from each dataset is selected to extract the features. To extract features, the last layer of each CNN model is removed, and the output from the previous layer is retained. These outputs serve as the features for further analysis or model training tasks. This approach allows for the creation of meaningful and informative features derived from the input data. MAE and MSE of two models can be found in \ref{table:cnn_result_comparison}
+
+\begin{table}[]
+\centering
+    \caption{Feature engineering with CNN result comparison}
+    \label{table:cnn_result_comparison}
+    \begin{tabular}{|l|l|l|}
+        \hline
+        \textbf{Imputation Method} & \textbf{MAE} & \textbf{MSE} \\ \hline
+        Linear Interpolation & 2.0494 & 6.9286 \\ \hline
+        PPCA & 2.0503 & 6.8565 \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Model Training}
+
+In the model training phase, the features extracted from the CNN algorithm are combined with other relevant features, including total urine output, the worst ventilation status, and the worst Glasgow Coma Scale (GCS) related values. However, gender and age are excluded from this experiment due to their low correlation coefficients, as indicated in Table \ref{table:cc_value} from Experiment I. This decision is based on the understanding that features with low correlation coefficients may have limited predictive power and may not significantly contribute to the model's performance. Therefore, removing gender and age helps streamline the feature set.
+
+Indeed, managing the number of features is crucial for optimizing the performance of XGBoost model. However, in CNN model, the parameter of the last layer decides the amount of outputted values. To achieve optimal performance, it's essential to adjust both models in tandem. In the CNN model, parameters are adjusted from the last layer towards the first layer, primarily focusing on the output amount. This adjustment ensures that the CNN model outputs an appropriate number of features that can effectively complement the XGBoost model.
+
+On the other hand, in the XGBoost model, the number of trees and the maximum depth of each tree are adjusted to balance the number of input features from the CNN model. This balancing act aims to prevent overfitting and maximize the performance of the combined model. By fine-tuning both models simultaneously, we can ensure that the features extracted from the CNN model are effectively utilized by the XGBoost model, resulting in improved predictive performance while mitigating the risk of overfitting.
+
+\chapter{Results}
+\label{ch:results}
+This chapter presents the results of the two experiment, encompassing the models' structure, performance of models in both experiments, and explainable result in experiment I.
+
+\section{Experiment I}
+
+As a result of Experiment I, we have developed two models based on different correlation methods: XG-Pearson and XG-Spearman.
+
+XG-Pearson model comprises 8 features: GCS, GCS Motors, Ventilation Status, SPO2, Urine output, Respiratory Rate, Heart Rate, and sbp. It achieved the best performance metrics in the test dataset, with an MAE of 1.4173 and RMSE of 1.8222.
+
+On the other hand, XG-Spearman model includes 11 features: GCS, GCS Motors, Ventilation Status, urine output, sbp, mbp, respiratory rate, SPO2, heart rate, GCS Eyes, and dbp. It yielded an MAE of 1.427 and RMSE of 1.840.
+
+A performance comparison between the two models, and other algorithms, is presented in Table \ref{table:Perfomance_comparison}. (As there isn't study on predicting LODS, models of other algorithms are also trained by us.) Notably, both XGBoost models outperformed other models, with the XG-Pearson model exhibiting slightly better performance metrics compared to the XG-Spearman model. And the best thing of XG-Pearson is that it has the least feature amount.
+
+Figure \ref{fig:experiment_1_result} illustrates the comparison of results between the two models. In the Actual vs. Predicted plots, shown in subfigures \ref{subfig:xg_pearson} and \ref{subfig:xg_spearman}, the black lines represent the ideal scenario where the predicted value equals the actual value, while the points represent the predicted values plotted against the actual values. These points are marked with varying transparency levels, indicating the density of points in each region. Darker areas indicate higher point density.
+
+From the figure, it is evident that both models perform admirably within the LODS range of 2-5, exhibiting similar distributions. However, within the LODS range of 10-20, the XG-Pearson model demonstrates a superior distribution compared to the XG-Spearman model. This is evidenced by the predicted values of the XG-Pearson model being closer to the black line, indicating better alignment with the actual values in this LODS range.
+
+In the residual plots, depicted in Figure \ref{subfig:xg_pearson_residual} and Figure \ref{subfig:xg_spearman_residual}, the grey lines represent the ideal scenario where there is no difference between the actual value and the predicted value. The points on the plot represent the residual values plotted against the actual values.
+
+Upon analysis of the figures, it is observed that within the LODS range of 2-5, both models perform comparably. The residual plot for XG-Spearman exhibits a slightly wider dispersion of points compared to XG-Pearson, although the residuals are slightly closer to the ideal line. Conversely, within the LODS range of 10-20, the performance trends shift. In this range, the residual plot for XG-Pearson shows residuals that are slightly closer to the ideal line compared to XG-Spearman. However, it's worth noting that the overall residual patterns for both models are similar. Overall, while there are slight variations in performance between the two models across different LODS ranges, their overall residual patterns remain similar.
+
+In the Bland-Altman plots depicted in Figure \ref{subfig:xg_pearson_ba} and Figure \ref{subfig:xg_spearman_ba}, the grey line near 0 represents the mean difference between the predicted and actual values. The other two lines represent the limits of agreement, calculated as the mean difference plus or minus 1.96 times the standard deviation of the differences.
+
+Upon analysis of the figures, it is observed that both models perform well within the LODS range of 0-6, as indicated by their good agreement with the actual values. However, within the LODS range of 7-10, the performance of both models deteriorates. The agreement between the predicted and actual values becomes less consistent, indicating poorer performance in this range. Within the LODS range of 11-22, there are fewer examples available for analysis, limiting the ability to provide a precise assessment of model performance in this range.
+
+
 \begin{table}[]
 \centering
     \caption{Performance comparison in Experiment I}
@@ -916,60 +996,76 @@ As a result, we got a model with 8 features based on Pearson correlation, GCS, G
 
 \begin{figure*}
   \begin{center}
-    \subfigure[XGBoost with Pearson Correlation]{
+    \subfigure[XG-Pearson: Actual vs Predicted]{
       \includegraphics[width=0.45\textwidth]{thesis/img/xg_pearson.png}
       \label{subfig:xg_pearson}}
     \qquad                        
-    \subfigure[XGBoost with Spearman Correlation]{
+    \subfigure[XG-Spearman: Actual vs Predicted]{
       \includegraphics[width=0.45\textwidth]{thesis/img/xg_spearman.png}
       \label{subfig:xg_spearman}}
-    \caption[Actual value \& Predicted value]{Comparison between actual LODS and predicted LODS in Experiment I}
+
+    \subfigure[XG-Pearson: Residual Plot]{
+      \includegraphics[width=0.45\textwidth]{thesis/img/pearson_residual.png}
+      \label{subfig:xg_pearson_residual}}
+    \qquad                        
+    \subfigure[XG-Spearman: Residual Plot]{
+      \includegraphics[width=0.45\textwidth]{thesis/img/spearman_residual.png}
+      \label{subfig:xg_spearman_residual}}
+
+    \subfigure[XG-Pearson: Bland-Altman]{
+      \includegraphics[width=0.45\textwidth]{thesis/img/pearson_ba.png}
+      \label{subfig:xg_pearson_ba}}
+    \qquad                        
+    \subfigure[XG-Spearman: Bland-Altman]{
+      \includegraphics[width=0.45\textwidth]{thesis/img/spearman_ba.png}
+      \label{subfig:xg_spearman_ba}}
+      
+    \caption[Results comparison in Experiment I]{Comparison between models in Experiment I: XG-Pearson and XG-Spearman (The darkness of each point's color is determined by the number of points within each predicted value area of the model. In essence, it reflects the density or concentration of data points within specific ranges of predicted values. Darker colors signify a higher density of data points within those predicted value areas, while lighter colors indicate fewer data points.)}    
     \label{fig:experiment_1_result}
+  \end{center}
+\end{figure*}
+
+
+\subsection{Explainable}
+
+
+In Experiment I, we calculated SHAP values, as depicted in Figure \ref{fig:experiment_1_shap}, to assess the contribution of each feature in the models. From Figure \ref{subfig:xg_pearson_shap}, several insights can be gleaned:
+\begin{itemize}
+\item Total urine output exhibits a high contribution, both with high and low values. This could be attributed to urine output directly reflecting renal function, an organ covered in LODS scoring.
+\item Glasgow Coma Scale (GCS) values show varying contributions. Low GCS values indicate higher danger and contribute significantly, whereas high GCS values contribute less or may even have a negative impact. This suggests that when patients' neurological status is stable, the model relies more on other features. 
+Similar trends are observed with GCS Motor, indicating neurological status.
+\item Heart rate and sbp, which may indicate cardiovascular status, show significant contributions regardless of whether they are high or low.
+\item Ventilation status and respiratory rate, representing pulmonary status, exhibit notable contributions. Interestingly, both high and low respiratory rates contribute significantly, while the contribution from low ventilation status (highly mechanical ventilation) is comparatively lower. This discrepancy may be influenced by the limited number of examples with highly mechanical ventilation status in the dataset.
+\item Spo2, indicating hematologic status, primarily contributes when SPO2 levels are low. The maximum limit value of SPO2 also serves as an indicator of normalcy, with only low values contributing significantly to the prediction.
+\end{itemize}
+
+When examining the XG-Spearman model, it's observed that the features shared with XG-Pearson exhibit similar trends but with slight differences in contribution values. However, for the other features:
+\begin{itemize}
+\item GCS Eyes shows consistently low contribution values regardless of whether the values are high or low.
+\item DBP and MBP, which also indicate cardiovascular status, exhibit different contribution patterns. Low MBP contributes significantly in a positive way and slightly in a negative way, while high MBP contributes negatively. Conversely, DBP works in the opposite manner.
+\end{itemize}
+
+Overall, the SHAP values provide valuable insights into the contributions of different features to the model predictions, shedding light on the factors influencing LODS scoring. These differences in contribution patterns highlight the nuances in how each feature influences the predictions of the XG-Spearman model compared to the XG-Pearson model. Despite some similarities in trends, the specific contributions of certain features can vary between the two models.
+
+
+\begin{figure*}
+  \begin{center}
+    \subfigure[XG-Pearson: SHAP values]{
+      \includegraphics[width=0.45\textwidth]{thesis/img/pearson_shap.png}
+      \label{subfig:xg_pearson_shap}}
+    \qquad                        
+    \subfigure[XG-Spearman: SHAP values]{
+      \includegraphics[width=0.45\textwidth]{thesis/img/spearman_shap.png}
+      \label{subfig:xg_spearman_shap}}
+    \caption[SHAP values in Experiment I]{SHAP Values Plot in Experiment I: XG-Pearson and XG-Spearman}    
+    \label{fig:experiment_1_shap}
   \end{center}
 \end{figure*}
 
 
 \section{Experiment II}
 
-The target of Experiment II is using data of each hour in the first 12 hours to predict LODS.
-
-In this experiment, we collected maximum, minimum and average value of vital signs of each hour in the first 12 hours, include heart rate, sbp, map, dbp, spo2, temperature, and respiratory rate. Total urine output, worst ventilation status, and worst GCS values in the first 12 hours are collected as well. The criteria is that for each vital sign, there should be at least one record in the 12 hours. Moreover, because the vital signs are monitored and recorded depends on patients' situation, not all vital signs are recorded every hour for each patient. Then there are missing data, mostly missing at random (MAR) and not missing at random (NMAR). 
-
-\subsection{Missing Data Imputation}
-
-Two missing data imputation methods are applied in this experiment, linear imputation and PPCA. In this experiment, data missing only happens on vital signs data, where there should be 21*12 data collected. To perform the imputation, the data are listed in a 21*12 structure, ordered with time-series.
-
-According to an interview with a medical doctor, \enquote{When checking a patient's situation, trend is more important than the exact vital sign number}. When imputing missing data, we try to keep each missing data in a trend, then linear interpolation is applied to calculate missing data. If data of the first hour or the first several hours are missing, then the first recorded data is applied on the first several hours. Same criteria applies on the last hour or the last several hours.
-
-PPCA is performed on each records, which means each record will has its own missing data imputation process as data missing criteria varies from record to record. This process is executed with Matlab. As the data are imputed with probability calculation. There will be different value imputed for same missing data in different PPCA running processes. So the imputation was ran 5 times. Then 10 randomly selected values are compared to check the imputed result, that the criteria is that to find the better imputed results. We consider the result which is closer to the average of a total of 5 hours before and after the missing value is the better value. The 3 files with most "better imputed results" are randomly combined to create a new dataset for training.
-
-
-\subsection{Feature Engineering}
-
-In this experiment, vital signs are collected hour by hour, while the others are collected once with the worst or total value. So they are processed in different ways. Vital signs are processed with a feature engineering to extract a features from the 21*12 data. The others, total urine output, ventilation and GCS values, are proceeded without feature engineering as 1) urine output might not be an continuous operation happens in every hour or not recorded as frequent as vital signs. 2) GCS values are not recorded frequently, mostly there are less than 3 times in the first 12 hours. 3) ventilation changes very little.
-
-With review the imputed missing data, we decided to keep the average value only with reasons: 1) patients' situation don't have large changes in one hour which means the maximum value and minimum value don't have a large gap. So it's not needed to perform the worst check as experiment I. 2) mostly there is only one value recorded in each hour, which means maximum, minimum and average are the same value. 3) To take a trend, it is either all data are maximum, or all data are minimum. But the worst value might change between maximum and minimum which will affect the trend. However, average value could show the trend. 
-
-CNN algorithm is applied on the rest 7*12 data to extract the features. We trained models for both dataset imputed with linear imputation and PPCA. To train the model, LODS is set as target and the average vital signs of the first 12 hours are set as input. Two models are trained, best performance of each model is kept to extract data. The performance is evaluated with MSE and MAE. Then remove the last layer and take the out put as the features. (pic is needed for both models)
-
-When training the models, we found that the MAE of both models are almost same, but the model trained with dataset imputed by PPCA has better MSE, as table \ref{table:cnn_result_comparison}. This might causes from the imputed data, which let CNN model learn more details.
-
-\begin{table}[]
-\centering
-    \caption{Feature engineering with CNN result comparison}
-    \label{table:cnn_result_comparison}
-    \begin{tabular}{|l|l|l|}
-        \hline
-        \textbf{Imputation Method} & \textbf{MAE} & \textbf{MSE} \\ \hline
-        Linear Interpolation & 2.0494 & 6.9286 \\ \hline
-        PPCA & 2.0503 & 6.8565 \\ \hline
-    \end{tabular}
-\end{table}
-
-\subsection{Experiment}
-The extracted features are combined with other features in model training period, include total urine output, the worst ventilation status, the worst GCS related values. According to the correlation coefficient got in Experiment I, gender and age are removed in this experiment. 
-
-As the feature amount in a XGBoost model affects the performance, it's important to manage the feature amount. However, in CNN model, the parameter of the last layer decides the amount of outputted values. So the best way is to adjust two models together, the parameters of layers in CNN model and the hyper-parameter of XGBoost model. In CNN model, we adjust the parameters since the last layer, mainly the output amount, and one by one back the the first layer. In XGBoost model, the we adjust the amount of trees and the maximum depth of each tree to balance the amount of inputted features from CNN model, which aims to prevent overfitting and achieve the best performance. Figure \ref{fig:xg_cnn_li_struc} show the details of model trained with XGBoost-CNN-Linear Interpolation, and Figure \ref{fig:xg_cnn_ppca_struc} show the details of model trained with XGBoost-CNN-PPCA. They have different layers parameters.
+After fine-tuning, we developed two models in Experiment II. Figure \ref{fig:xg_cnn_li_struc} illustrates the details of the model trained with XGBoost-CNN-Linear Interpolation (Hereinafter referred to as XG-CNN-LI), while Figure \ref{fig:xg_cnn_ppca_struc} depicts the details of the model trained with XGBoost-CNN-PPCA (Hereinafter referred to as XG-CNN-PPCA). These models have different layer parameters, reflecting the distinct configurations optimized for each method of data imputation.
 
 \begin{figure*}
   \begin{center}
@@ -986,23 +1082,45 @@ As the feature amount in a XGBoost model affects the performance, it's important
   \caption[XGBoost-CNN-PPCA model]{Model structure of XGBoost-CNN-PPCA}
   \label{fig:xg_cnn_ppca_struc}
 \end{figure*}
+As a result, with XG-CNN-LI, we obtained a model that combines a CNN model consisting of 9 layers and 16 outputs, along with an XGBoost model with 100 trees. The performance metrics for this model indicate an RMSE of 1.912 and an MAE of 1.481.
 
-\subsection{Result}
-As a result, with the data imputed with linear interpolation (Hereinafter referred to as XG-CNN-LI) , we got a model that combines a CNN model of 9 layers and 16 outputs, and a XGBoost model with 100 trees, as figure. The result of the model is that RMSE is 1.912 and MAE is 1.481. With the data imputed with PPCA (Hereinafter referred to as XG-CNN-PPCA) , we got a model that combines a CNN model of 9 layers and 24 outputs and a XGBoost model with 100 trees, as figure. The result of the model is that RMSE is 1.916 and MAE is 1.468.
+Similarly, with XG-CNN-PPCA, we obtained a model that merges a CNN model comprising 9 layers and 24 outputs with an XGBoost model featuring 100 trees. The performance metrics for this model show an RMSE of 1.916 and an MAE of 1.468.
 
-Compare the results of two models, performance of both models are similar. However, XG-CNN-PPCA model acts better in MAE but slightly worse on RMSE. The reason may be that it has model features input to predicting part, XGBoost training part, which causes a higher fitting level. Figure \ref{fig:experiment_2_result} show the predicted value and actual value comparison of the two models, where the black lines refer to the perfect situation. XG-CNN-LI model performs well in predicting values range 2-5 and distributes similar in all LODS value range. When predicting values range 2 to 3, the predicted values mostly more than actual values. While predicting values range 7 to 15, the predicted values are mostly less than actual values. In contrast, XG-CNN-PPCA distributes similar in LODS ranges 1-14, only when actual value is 15, it has a bad performance. And it performs well in LODS range 2 to 6, where more values close to perfect situation.
+In Figure \ref{fig:experiment_2_result}, the performance comparison of XG-CNN-LI and XG-CNN-PPCA is presented. From the Actual vs Predicted plots (\ref{subfig:xg_cnn_li} and \ref{subfig:xg_cnn_ppca}), where the black lines refer to the perfect situation, several observations can be made. Within the LODS range of 2-5, the points corresponding to XG-CNN-PPCA are closer to the ideal scenario compared to XG-CNN-LI, indicating a better alignment between predicted and actual values in this range. However, within the LODS range of 6-15, the points for XG-CNN-PPCA appear slightly more dispersed compared to XG-CNN-LI. This suggests that there may be greater variability in the predicted values of XG-CNN-PPCA within this range. This also explains why XG-CNN-PPCA has higher RMSE. Overall, XG-CNN-PPCA performs closer to the ideal scenario across the entire LODS range compared to XG-CNN-LI, indicating superior predictive accuracy and consistency.
+
+In the residual plots (\ref{subfig:xg_cnn_li_residual} and \ref{subfig:xg_cnn_ppca_residual}), where the grey line represents the ideal scenario, several observations can be made. Residuals of XG-CNN-PPCA are generally closer to the ideal line compared to XG-CNN-LI, particularly within the LODS range of 2-5. This suggests that XG-CNN-PPCA exhibits better alignment between predicted and actual values within this range. However, within LODS ranges over 6, both models demonstrate similar residual patterns, indicating comparable performance in these ranges. Notably, in the residual plot of XG-CNN-PPCA, there are more points with larger residuals compared to XG-CNN-LI, particularly evident when LODS is 4. This indicates that XG-CNN-PPCA may have a higher degree of variability or error in predictions for certain LODS values compared to XG-CNN-LI.
+
+
+Upon analyzing the Bland-Altman plots (\ref{subfig:xg_cnn_li_ba} and \ref{subfig:xg_cnn_ppca_ba}), where the grey line near 0 represents the mean difference and the other two lines represent the limits of agreement, several observations can be made. Within the LODS range of 0-5, both XG-CNN-LI and XG-CNN-PPCA demonstrate good agreement with the actual values, as indicated by the points being clustered around the mean difference line and falling within the limits of agreement. Within the LODS range of 6-12, XG-CNN-PPCA shows slightly better agreement with the actual values compared to XG-CNN-LI. This is evident from the points being more tightly clustered around the mean difference line and falling within narrower limits of agreement. Overall, XG-CNN-PPCA exhibits better agreement with the actual values across all LODS ranges compared to XG-CNN-LI, indicating superior performance in terms of predictive accuracy and consistency.
+
 
 \begin{figure*}
   \begin{center}
-    \subfigure[XG-CNN-LI model comparison]{
+    \subfigure[XG-CNN-LI: Actual vs Predicted]{
       \includegraphics[width=0.45\textwidth]{thesis/img/xg_cnn_li.png}
       \label{subfig:xg_cnn_li}}
     \qquad                        
-    \subfigure[XG-CNN-PPCA model comparison]{
+    \subfigure[XG-CNN-PPCA: Actual vs Predicted]{
       \includegraphics[width=0.45\textwidth]{thesis/img/xg_cnn_ppca.png}
       \label{subfig:xg_cnn_ppca}}
-    \caption[Actual value \& Predicted value]{Comparison between actual LODS and predicted LODS in Experiment II result}
 
+    \subfigure[XG-CNN-LI: Residual Plot]{
+      \includegraphics[width=0.45\textwidth]{thesis/img/li_residual.png}
+      \label{subfig:xg_cnn_li_residual}}
+    \qquad                        
+    \subfigure[XG-CNN-PPCA: Residual Plot]{
+      \includegraphics[width=0.45\textwidth]{thesis/img/ppca_residual.png}
+      \label{subfig:xg_cnn_ppca_residual}}
+
+    \subfigure[XG-CNN-LI: Bland-Altman]{
+      \includegraphics[width=0.45\textwidth]{thesis/img/li_ba.png}
+      \label{subfig:xg_cnn_li_ba}}
+    \qquad                        
+    \subfigure[XG-CNN-PPCA: Bland-Altman]{
+      \includegraphics[width=0.45\textwidth]{thesis/img/ppca_ba.png}
+      \label{subfig:xg_cnn_ppca_ba}}
+      
+    \caption[Results comparison in Experiment I]{Comparison between models in Experiment I: XG-CNN-LI and XG-CNN-PPCA (The darkness of each point's color is determined by the number of points within each predicted value area of the model. In essence, it reflects the density or concentration of data points within specific ranges of predicted values. Darker colors signify a higher density of data points within those predicted value areas, while lighter colors indicate fewer data points.)}
     \label{fig:experiment_2_result}
   \end{center}
 \end{figure*}
@@ -1010,28 +1128,63 @@ Compare the results of two models, performance of both models are similar. Howev
 \chapter{Discussion}
 \label{ch:discussion}
 
-Proved in the two experiments, predicting total LODS value of first day in ICU is practicable via machine learning with first 12 hours bed-side data in ICU. With this total LODS value and original formula from LODS, patients' severity of death can be calculated. All models perform well in range LODS value 2-5, because there are many records in this range, much more than other LODS value. When considering patients' situation in this range, not a dangerous condition, the current MAE is acceptable. The model trained in Experiment I with Pearson Correlation Coefficient can be considered as a good prediction model.
+In this study, our primary focus lies in predicting the LODS value using bedside data collected within the first 12 hours of ICU admission. The LODS value holds significant clinical relevance as it can be utilized to calculate the probability of mortality. Early prediction of LODS can provide valuable support to healthcare professionals in adjusting treatment plans promptly, thereby potentially improving patient outcomes.
 
-But on other LODS, the performance are bad. The reason might be data for those values are too little, especially for those LODS value over 17. There are only 7 records in total 8034 records, less than 0.1\%. They might be considered as abnormal values during training. After randomly split to training set and test set, there will be less in training set, or even no records. Then even with cross validation, these records may be too little. So for further study, there should be more data in range 15 - 22 be used in training. These data need more weight as they represent a bad patient's situation. Accuracy in this range need to be higher than in range 0-5.
+A key objective of our research is to minimize the number of features utilized in the prediction model. By doing so, we aim to enhance the practicality and ease of clinical application of the model. This streamlined approach not only simplifies the predictive process but also reduces the complexity associated with interpreting and utilizing the model in real-world clinical settings.
 
-In Experiment I, Pearson Correlation Coefficient and Spearman Correlation Coefficient are used. Their performance are different. Pearson Correlation Coefficient worked better then Spearman Correlation Coefficient, that model with Pearson correlation uses less features and provide better prediction result than the model with Spearman correlation. Pearson correlation originally measures linear relationship between two variables. But vital signs or ventilation status shouldn't have directly linear relationship with LODS value. The connection is that some vital signs, for instance heat rate, are involved in LODS parameters, but this can not be considered as linear relationship. This experiment show a new thought, that even though features and target don't have linear relationship, Pearson Correlation Coefficient can still be used to measure correlation.
+In Experiment I, the XG-Pearson model demonstrated commendable performance with an MAE of 1.417 and RMSE of 1.822, outperforming other models. Notably, this model succeeded in achieving its objective of utilizing a minimal number of features, employing only 8 features. Considering the MAE of 1.417 within the total LODS range of 22, it represents a relatively small error.
 
-Moreover, with both correlation coefficients, GCS Motor and GCS Eyes have high correlation with LODS value. When considering these values background, we can take a wild guess that human movement condition and eye reaction condition may also represent overall organ system situation, or partly represent. 
+When evaluating the impact of this error on the calculation of mortality probability, it's important to note the significance of LODS ranges. Figure ~\ref{fig:lods_mortality} illustrates that for LODS values within the range of 0-5 and 13-22, the MAE of 1.417 may not significantly affect the mortality probability calculation. However, it becomes more consequential for LODS values falling within the range of 6-12. In this range, even small deviations in LODS can lead to considerable variations in mortality probability. Therefore, while the XG-Pearson model demonstrates promising performance overall, it's essential to consider the potential implications of its predictive accuracy, particularly in critical LODS ranges. 
 
-In Experiment II, PPCA and Linear Interpolation are both applied and compared. In both feature engineering  period and XGBoost model training period, the dataset whose missing value are imputed with PPCA acts better than Linear Interpolation. Even though the difference is small, we can still get a conclusion that PPCA is a better option to perform missing data imputation than linear interpolation. Moreover, when compare results, XG-CNN-PPCA has a better distribution in all LODS ranges. It is a more promising model. It may perform much better when more data whose actual value ranges in 15 to 22 are included in training.
+Based on Figure ~\ref{fig:lods_distri_fig}, the majority of records in this study fall within the LODS range of 2-6, accounting for approximately 68\% of all records. Given this distribution, it's crucial to evaluate the performance of the XG-Pearson model within this predominant LODS range.
 
-When compare results of experiment I and experiment II, experiment I results are better than experiment II. The feature engineering with CNN did not give better result. We can not conclude that model with XGBoost only must be better than the model with both CNN and XGBoost. The experiment II has more steps and is more complicated than experiment I. Its missing data are imputed with calculation which are different from the real data. While all the data used in experiment I are real data, which causes less uncertainties or error than experiment I. A complicated model accompanied by more uncertainties which may affect the final performance of a model. Occam's razor may also applied in model training, that the simplest model would be usually the best one.
+Referring to Figure ~\ref{fig:experiment_1_result}, which showcases the model's performance, particularly within the LODS range of 2-6, we observe that both XG-Pearson and XG-Spearman models exhibit strong performance. The residuals are minimal and concentrated around 0, indicating a close alignment between the predicted and actual values. This suggests that within the prevalent LODS range of 2-6, both models demonstrate robust predictive capabilities and effectively capture the underlying patterns in the data. However, XG-Pearson has better concentration and similar residual than XG-Spearman.
 
+In Experiment I, both Pearson Correlation Coefficient and Spearman Correlation Coefficient were utilized to assess the relationship between features and the LODS value. Surprisingly, despite the assumption that Pearson Correlation Coefficient, which traditionally measures linear relationships, might not be suitable for assessing the connection between vital signs or ventilation status and LODS values, it yielded more helpful insights compared to Spearman Correlation Coefficient.
+
+Traditionally, Pearson correlation assesses linear relationships between two variables. However, vital signs and ventilation status aren't expected to exhibit a direct linear relationship with LODS values. While some vital signs like heart rate may be involved in LODS parameters, the relationship isn't strictly linear. Nevertheless, this experiment unveils a novel perspective: even when the features and target don't conform to a linear relationship, Pearson Correlation Coefficient can still provide valuable insights into their correlation. This highlights the adaptability and potential utility of traditional statistical measures in unconventional contexts.
+
+Indeed, the SHAP values derived from both the XG-Pearson and XG-Spearman models highlight the significant contributions of certain features, notably urine output, GCS values, heart rate, and systolic blood pressure (sbp). These features are closely associated with the renal, neurologic, and cardiovascular systems, respectively, which are the three organ systems with a maximum LODS score of 5 in the LODS system. Consequently, their heightened contribution to the prediction models can be attributed to their direct relevance to the organ dysfunction being assessed by the LODS score. This underscores the importance of these physiological parameters in predicting and assessing the severity of organ dysfunction in critically ill patients. 
+
+In Experiment II, both the XG-CNN-LI and XG-CNN-PPCA models demonstrated comparable performance, achieving similar levels of accuracy as measured by MSE and RMSE. Overall, both models met the objectives of the study, indicating their efficacy in predicting LODS values based on bedside data collected within the first 12 hours of ICU admission. However, it's worth noting that the impact of their MSE on the probability of mortality calculations is particularly significant when the real LODS falls within the range of 6-12. Indeed, given the distribution of records, with a significant proportion falling within the LODS range of 2-6, the XG-CNN-LI and XG-CNN-PPCA models exhibit excellent performance in predicting LODS values within this range.
+
+When comparing the results of the two models, it's evident that the performance of both models is similar. However, the XG-CNN-PPCA model exhibits better performance in terms of MAE but slightly worse in terms of RMSE compared to the XG-CNN-LI model. One possible explanation for this discrepancy is that the XG-CNN-PPCA model incorporates more features into the prediction process, including those from the XGBoost training part. As a result, this model may have a higher level of fitting, leading to improved accuracy in terms of MAE but potentially slightly higher error in terms of RMSE due to a little overfitting. Overall, while both models demonstrate comparable performance, the XG-CNN-PPCA model's inclusion of additional features may contribute to its slightly superior MAE performance.
+
+Moreover, based on the results presented in Table \ref{table:cnn_result_comparison}, it is evident that the Mean Absolute Error (MAE) values for both models are nearly identical. However, the model trained with the dataset imputed using PPCA demonstrates superior performance in terms of Mean Squared Error (MSE). This discrepancy suggests that the imputation method utilized can significantly impact the performance of the CNN model.
+
+The observed improvement in MSE for the model trained with the PPCA-imputed dataset may be attributed to the imputation process providing additional details or nuances in the data. By incorporating probabilistic calculations and leveraging the underlying structure of the dataset, PPCA may enable the CNN model to capture more intricate patterns or relationships within the data, leading to improved predictive performance.
+
+Overall, these findings underscore the importance of careful consideration when selecting an imputation method, as it can have a notable impact on the subsequent model's performance and ability to learn from the data effectively.
+
+Absolutely, the superior performance of XG-CNN-PPCA, as observed in both Figure \ref{fig:experiment_1_result} and Figure \ref{fig:experiment_2_result}, can indeed be attributed to the combination of effective missing data imputation using PPCA and the detailed feature extraction capabilities of the CNN model.
+
+The ability of PPCA to accurately impute missing data, coupled with the CNN's capacity to capture intricate patterns and relationships within the dataset, enables XG-CNN-PPCA to provide more precise predictions of LODS values. This model consistently adheres to the ideal scenario and demonstrates a higher concentration of points within the area of agreement in the Bland-Altman Plot.
+
+Given its robust performance across a wide range of LODS values, XG-CNN-PPCA emerges as the most promising model among the four. With an ample dataset containing diverse LODS values, XG-CNN-PPCA has the potential to deliver even better performance and could prove to be invaluable in clinical settings.
+
+\section{Limitations}
+While this study has successfully achieved its primary objective of predicting LODS using bedside data and advanced machine learning techniques, there are indeed some limitations that warrant consideration.
+
+The primary limitation encountered in this study pertains to the imbalanced distribution of data. Specifically, the dataset's distribution of LODS values is non-uniform, potentially introducing bias into the predictive models and impacting their performance, particularly in the case of less frequently occurring LODS categories. To address this limitation effectively, it is imperative to augment the dataset with additional instances featuring higher LODS values. 
+
+This research utilizes data from MIMIC-IV, which gathers medical data from Boston, Massachusetts. However, it is noteworthy that the LODS scoring system was initially developed based on data from France. Given the variations in weather, diet, and geographical conditions between Boston and France, individuals residing in these locations may exhibit different physiological characteristics. Therefore, considering medical data from France or other regions of Western Europe as an alternative data source could present a valuable opportunity. Such data may enable the training of models with enhanced performance compared to those developed in this study, as they would be more aligned with the original context in which the LODS scoring system was established. 
+
+We have demonstrated that machine learning models trained on bedside data can effectively predict the total LODS value, providing insights into a patient's overall organ system status. This success prompts further exploration into utilizing bedside data and machine learning techniques for predicting scores specific to individual organ systems.
+
+For each organ system, it's conceivable that a subset of features may be sufficient for accurate prediction. For example, urine output, which primarily reflects renal function, may not be essential for predicting cardiovascular status. By tailoring feature selection to the unique characteristics and dependencies of each organ system, we can potentially streamline model complexity and enhance predictive performance. This approach not only optimizes the use of available data but also provides more targeted insights into the health of specific organ systems, facilitating more personalized patient care strategies.
+
+ 
 
 \chapter{Conclusion}
 \label{ch:conclusion}
 
-\section{Further Research}
-Data source, this research uses data from MIMIC-IV which takes medical data from Boston, Massachusetts. However, LODS was originally developed based on data from France. Due to difference in weather, diet and geographical condition, people live in these places have different body condition. So medical data from France or western Europe is another good option as data source and may train a model with better performance than the models in this study.
+In this thesis, we delved into the Logistic Organ Dysfunction Score (LODS) and endeavored to predict it using bedside data collected within the first 12 hours of ICU admission. The overarching aim was to calculate patients' probability of mortality based on this predictive model. Through our research, we proposed several models, including those leveraging deep learning techniques, to aid in this prediction process.
 
-LODS is proved to be useful for ICU patients in the first 7 days stay. Patients' data in the first 7 days can also be included in similar study. But it should be used as a separated test set for validation, because LODS is originally designed for first 24h ICU stay.
+Our findings have demonstrated that an XGBoost model utilizing only 8 features can provide reliable predictions of LODS. Additionally, our investigation into a hybrid model combining Convolutional Neural Networks (CNN) and XGBoost suggests a promising avenue for further research. Both approaches offer potential avenues for clinical decision support, thereby enhancing patient care and management strategies in critical care settings.
 
-Now, we have proved that machine learning with bed-side data can be used to predict total LODS value to show patient's organ systems situation. Bed side data and machine learning can also be brought to predicting score for each organ system. Then for each organ system, less features may needed, for instance urine output may not needed for cardiovascular as it mainly measures the situation of renal.
+We are confident that this study can be extended and refined with access to additional data, particularly focusing on instances with high LODS values. Augmenting the dataset with more diverse and representative samples, including data from regions outside of Boston, Massachusetts, such as Western Europe, where LODS was originally developed, could significantly enhance the generalization capabilities of our models. By broadening the scope of the database and incorporating data from varied geographical locations, we anticipate substantial improvements in model performance. This expansion in training data would enable our models to better capture the diverse range of patient conditions and characteristics, thus enhancing their predictive accuracy and robustness.
+
+ 
 
 
 
@@ -1041,7 +1194,7 @@ Now, we have proved that machine learning with bed-side data can be used to pred
 \printbibliography[title=References]
 \addcontentsline{toc}{chapter}{References}
 
-
+\begin{comment}
 %
 % Appendices are optional. 
 % This part is semi-ugly at the moment. Please give feedback if can
@@ -1079,7 +1232,7 @@ a user manual, empirical knowledge produced while preparing the
 thesis, the results of a survey, lists, pictures, drawings, maps,
 complex charts (conceptual schema, circuit diagrams, structure charts)
 and so on.
-
+\end{comment}
 
 %
 % b) The other option is to use numbered chapter and our baseline
